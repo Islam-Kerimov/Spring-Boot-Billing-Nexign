@@ -1,13 +1,7 @@
-package ru.nexign.spring.boot.billing.cdr.entity;
+package ru.nexign.spring.boot.billing.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -16,6 +10,7 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "cdr_info")
 public class CallDataRecord implements Serializable {
 
@@ -29,9 +24,15 @@ public class CallDataRecord implements Serializable {
     private String callStart;
     @Column
     private String callEnd;
+    @Transient
+    private String tariffType;
 
     @Override
     public String toString() {
-        return callType + "," + phoneNumber + "," + callStart + "," + callEnd + "\n";
+        if (tariffType == null) {
+            return callType + "," + phoneNumber + "," + callStart + "," + callEnd + "\n";
+        } else {
+            return callType + "," + phoneNumber + "," + callStart + "," + callEnd + "," + tariffType + "\n";
+        }
     }
 }

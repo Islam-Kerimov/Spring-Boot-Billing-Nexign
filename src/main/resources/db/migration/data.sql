@@ -101,13 +101,13 @@ VALUES ('79182222220', 1, 400, 2),
 
 CREATE TABLE IF NOT EXISTS billing_report
 (
-    id              SERIAL PRIMARY KEY,
-    phone_number_id INT REFERENCES subscriber (id),
-    call_type       VARCHAR(2),
-    call_start      TIMESTAMP     NOT NULL,
-    call_end        TIMESTAMP     NOT NULL,
-    duration        TIMESTAMP     NOT NULL,
-    cost            NUMERIC(9, 2) NOT NULL
+    id            SERIAL PRIMARY KEY,
+    subscriber_id INT REFERENCES subscriber (id),
+    call_type     VARCHAR(2),
+    call_start    TIMESTAMP     NOT NULL,
+    call_end      TIMESTAMP     NOT NULL,
+    duration      TIMESTAMP     NOT NULL,
+    cost          NUMERIC(9, 2) NOT NULL
 );
 
 ----------------------------------------------
