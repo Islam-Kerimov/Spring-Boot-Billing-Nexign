@@ -3,12 +3,16 @@ package ru.nexign.spring.boot.billing.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
-import ru.nexign.spring.boot.billing.repository.BillingRealTimeRepository;
+import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.io.File.separator;
 
@@ -21,8 +25,9 @@ public class BillingRealTimeService {
 
     private final CallDataRecordReader callDataRecordReader;
     private final CallDataRecordWriter callDataRecordWriter;
-    private final BillingRealTimeRepository billingRealTimeRepository;
+    private final SubscriberRepository subscriberRepository;
 
+    @Transactional
     public void billing() {
         log.info("Выгрузка звонков всех абонентов в файл crd.txt");
         List<CallDataRecord> dataRecords = callDataRecordReader.read();
@@ -32,9 +37,16 @@ public class BillingRealTimeService {
 
         log.info("Авторизация и выгрузка данных абонентов 'Ромашка' " +
                 "с балансом больше нуля в файл crd+.txt");
-        Set<Subscriber> billing = billingRealTimeRepository.findAllByBalanceAndOperator();
-        List<CallDataRecord> dataRecordsWithTariff = callDataRecordReader.read(CDR_FILE, billing);
+        Set<Subscriber> correctSubscribers = subscriberRepository.findAllByBalanceAndOperator();
+        List<CallDataRecord> dataRecordsWithTariff = callDataRecordReader.read(CDR_FILE, correctSubscribers);
         int validRecords = callDataRecordWriter.write(dataRecordsWithTariff, CDR_FILE_PLUS);
         log.info("Выгружено {} звонков в файл crd+.txt", validRecords);
+    }
+
+    public void updateBalance(Map<String, Double> totalCost) {
+        Set<Subscriber> subscribersUpdate = subscriberRepository.findAllByPhoneNumberIn(totalCost.keySet());
+        subscribersUpdate.forEach(s -> s.setBalance(s.getBalance() - totalCost.get(s.getPhoneNumber())));
+        subscriberRepository.saveAll(subscribersUpdate);
+        log.info("Баланс {} абонентов изменен в соответствии с длительностью их разговоров", subscribersUpdate.size());
     }
 }

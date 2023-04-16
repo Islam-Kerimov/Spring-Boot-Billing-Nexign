@@ -1,14 +1,20 @@
 package ru.nexign.spring.boot.billing.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "tariff")
-public class TariffInfo {
+@Builder
+public class Tariff implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -20,10 +26,13 @@ public class TariffInfo {
     private Integer firstMin;
     private Double firstPrice;
     private Double minutePrice;
-    private boolean incomingInside;
-    private boolean outgoingInside;
-    private boolean incomingAnother;
-    private boolean outgoingAnother;
+    private Boolean incomingInside;
+    private Boolean outgoingInside;
+    private Boolean incomingAnother;
+    private Boolean outgoingAnother;
     private String monetaryUnit;
     private String redirect;
+
+    @OneToMany(mappedBy = "tariff")
+    private List<Subscriber> subscribers = new ArrayList<>();
 }

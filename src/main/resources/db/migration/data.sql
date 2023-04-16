@@ -99,15 +99,19 @@ VALUES ('79182222220', 1, 400, 2),
        ('79182222223', 4, 400, 2),
        ('79182222224', 2, 400, 2);
 
+INSERT INTO subscriber(phone_number, tariff_id, balance, operator_id)
+VALUES ('79210017003', 1, 0, 1);
+
 CREATE TABLE IF NOT EXISTS billing_report
 (
-    id            SERIAL PRIMARY KEY,
-    subscriber_id INT REFERENCES subscriber (id),
-    call_type     VARCHAR(2),
-    call_start    TIMESTAMP     NOT NULL,
-    call_end      TIMESTAMP     NOT NULL,
-    duration      TIMESTAMP     NOT NULL,
-    cost          NUMERIC(9, 2) NOT NULL
+    id           SERIAL PRIMARY KEY,
+    phone_number VARCHAR REFERENCES subscriber (phone_number),
+    call_type    VARCHAR(2),
+    call_start   TIMESTAMP     NOT NULL,
+    call_end     TIMESTAMP     NOT NULL,
+    duration     TIME          NOT NULL,
+    cost         NUMERIC(9, 2) NOT NULL,
+    CONSTRAINT unique_report UNIQUE (phone_number, call_type, call_start, call_end, cost)
 );
 
 ----------------------------------------------
@@ -211,6 +215,14 @@ VALUES ('02', '79181234597', '20230408161800', '20230408160800'),
        ('02', '79181111114', '20230416120000', '20230416121000'),
        ('02', '79182222224', '20230416120000', '20230416121000');
 
+INSERT INTO cdr_info (call_type, phone_number, call_start, call_end)
+VALUES ('02', '79210017003', '20230408000000', '20230408010000');
+
+
+
+-- INSERT INTO billing_report (phone_number, call_type, call_start, call_end, duration, cost)
+-- VALUES ('79181234582', '02', '2023-04-22 12:12:12.000000', '2023-04-22 12:52:12.000000', 2400, 0.00)
+-- ON CONFLICT ON CONSTRAINT un_report DO NOTHING;
 
 
 

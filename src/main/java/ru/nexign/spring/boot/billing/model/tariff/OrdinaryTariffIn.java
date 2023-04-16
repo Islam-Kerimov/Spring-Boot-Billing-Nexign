@@ -1,10 +1,11 @@
 package ru.nexign.spring.boot.billing.model.tariff;
 
-import ru.nexign.spring.boot.billing.model.CallType;
+import ru.nexign.spring.boot.billing.model.entity.CallType;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
-public class OrdinaryTariff implements Tariff {
+public class OrdinaryTariffIn implements TariffIn {
     private static final double minRub = 0.5;
     private int firstMinutes = 100;
 
@@ -25,12 +26,12 @@ public class OrdinaryTariff implements Tariff {
                 totalCost = (minutes * minRub);
                 firstMinutes -= minutes;
             } else {
-                totalCost = (firstMinutes * minRub) + ((minutes - firstMinutes) * ByMinuteTariff.minRub);
+                totalCost = (firstMinutes * minRub) + ((minutes - firstMinutes) * ByMinuteTariffIn.minRub);
                 firstMinutes = 0;
             }
             return totalCost;
         } else {
-            return minutes * ByMinuteTariff.minRub;
+            return minutes * ByMinuteTariffIn.minRub;
         }
     }
 }

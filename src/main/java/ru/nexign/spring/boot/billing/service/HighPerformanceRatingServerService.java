@@ -1,10 +1,15 @@
 package ru.nexign.spring.boot.billing.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.nexign.spring.boot.billing.model.CallType;
-import ru.nexign.spring.boot.billing.model.TariffType;
 import ru.nexign.spring.boot.billing.model.entity.BillingReport;
+import ru.nexign.spring.boot.billing.model.entity.CallType;
+import ru.nexign.spring.boot.billing.model.entity.TariffType;
 import ru.nexign.spring.boot.billing.model.tariff.*;
+import ru.nexign.spring.boot.billing.repository.BillingReportDao;
+import ru.nexign.spring.boot.billing.repository.BillingReportRepository;
+import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,26 +18,81 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.io.File.separator;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toMap;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class HighPerformanceRatingServerService {
+    private final SubscriberRepository subscriberRepository;
     private static final String CDR_FILE_PLUS = "data" + separator + "cdr+.txt";
     private static final DateTimeFormatter INPUT_FORMATTER = ofPattern("yyyyMMddHHmmss");
     private static final DateTimeFormatter OUTPUT_FORMATTER = ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public void saveInDataBase() {
+    private final BillingReportDao billingReportDao;
+
+    public Map<String, Double> computeSubscriberTotalCost() {
+        Map<String, Double> totalCost;
+
         try (BufferedReader reader = new BufferedReader(new FileReader(CDR_FILE_PLUS))) {
 
-            Map<String, Set<BillingReport>> allSubscribers = readAllFile(reader);
-            calculateCost(allSubscribers);
-            int i = 0;
+            Map<String, Set<BillingReport>> allReports = readAllFile(reader);
+            calculateCost(allReports);
+            log.info("Посчитана стоимость звонков всех абонентов");
+
+
+            Set<BillingReport> reports = allReports.entrySet().stream()
+                    .flatMap(v -> v.getValue().stream())
+                    .collect(Collectors.toSet());
+            List<String> savedReport = billingReportDao.saveAll(reports);
+            log.info("{} данных биллинга сохранено в БД", savedReport.size());
+
+            Set<String> uniqueReportNumbers = new HashSet<>(savedReport);
+            totalCost = allReports.entrySet().stream()
+                    .filter(k -> uniqueReportNumbers.contains(k.getKey()))
+                    .collect(toMap(
+                            Map.Entry::getKey,
+                            v -> v.getValue().stream()
+                                    .map(BillingReport::getCost)
+                                    .mapToDouble(Double::doubleValue)
+                                    .sum()));
+
         } catch (IOException ioe) {
             throw new RuntimeException("Ошибка во время чтения/записи файла: " + ioe);
+        }
+
+        return totalCost;
+    }
+
+    private void calculateCost(Map<String, Set<BillingReport>> map) {
+        for (Map.Entry<String, Set<BillingReport>> entry : map.entrySet()) {
+            Optional<TariffType> tariffType = entry.getValue().stream()
+                    .map(BillingReport::getTariffType)
+                    .findAny();
+
+            if (tariffType.isPresent()) {
+                TariffIn tariffIn = switch (TariffType.valueOf(tariffType.get().name())) {
+                    case UNLIMITED -> new UnlimitedTariffIn();
+                    case BY_MINUTE -> new ByMinuteTariffIn();
+                    case ORDINARY -> new OrdinaryTariffIn();
+                    case X -> new XTariffIn();
+                };
+
+                costCall(entry.getValue(), tariffIn);
+            }
+        }
+    }
+
+    private void costCall(Set<BillingReport> value, TariffIn tariffIn) {
+        for (BillingReport subscriber : value) {
+            double cost = tariffIn.addCostCall(CallType.fromString(subscriber.getCallType()), subscriber.getDuration());
+            subscriber.setCost(cost);
         }
     }
 
@@ -63,8 +123,8 @@ public class HighPerformanceRatingServerService {
 
     private BillingReport getBillingReport(String[] info) {
         BillingReport billingReport = new BillingReport();
-        billingReport.setCallType(CallType.fromString(info[0]));
-//        billingReport.setSubscriberId(info[1]);
+        billingReport.setCallType(info[0]);
+        billingReport.setPhoneNumber(info[1]);
         billingReport.setCallStart(getDateTime(info[2]));
         billingReport.setCallEnd(getDateTime(info[3]));
         billingReport.setDuration(getDurationTime(billingReport.getCallStart(), billingReport.getCallEnd()));
@@ -80,31 +140,5 @@ public class HighPerformanceRatingServerService {
     private LocalTime getDurationTime(LocalDateTime start, LocalDateTime end) {
         long timeSeconds = start.until(end, SECONDS);
         return LocalTime.ofSecondOfDay(timeSeconds);
-    }
-
-    public void calculateCost(Map<String, Set<BillingReport>> map) {
-        for (Map.Entry<String, Set<BillingReport>> entry : map.entrySet()) {
-            Optional<TariffType> tariffType = entry.getValue().stream()
-                    .map(BillingReport::getTariffType)
-                    .findAny();
-
-            if (tariffType.isPresent()) {
-                Tariff tariff = switch (TariffType.valueOf(tariffType.get().name())) {
-                    case UNLIMITED -> new UnlimitedTariff();
-                    case BY_MINUTE -> new ByMinuteTariff();
-                    case ORDINARY -> new OrdinaryTariff();
-                    case X -> new XTariff();
-                };
-
-                costCall(entry.getValue(), tariff);
-            }
-        }
-    }
-
-    private void costCall(Set<BillingReport> value, Tariff tariff) {
-        for (BillingReport subscriber : value) {
-            double cost = tariff.addCostCall(subscriber.getCallType(), subscriber.getDuration());
-            subscriber.setCost(cost);
-        }
     }
 }

@@ -3,7 +3,8 @@ package ru.nexign.spring.boot.billing.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.nexign.spring.boot.billing.model.CallType;
+import org.springframework.transaction.annotation.Transactional;
+import ru.nexign.spring.boot.billing.model.entity.CallType;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.repository.CallDataRecordRepository;
@@ -14,10 +15,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.stream.Collectors.toMap;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +34,14 @@ public class CallDataRecordReader {
         return repository.findAll();
     }
 
-    public List<CallDataRecord> read(String cdrFile, Set<Subscriber> billing) {
+    public List<CallDataRecord> read(String cdrFile, Set<Subscriber> correctSubscribers) {
         List<CallDataRecord> dataRecords = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(cdrFile))) {
 
-            Map<String, String> subscribers =
-                    billing.stream()
-                            .collect(toMap(Subscriber::getPhoneNumber, Subscriber::getUuid));
+            Map<String, String> correctPhoneTariff = correctSubscribers.stream()
+                    .collect(Collectors.toMap(
+                            Subscriber::getPhoneNumber,
+                            e -> e.getTariff().getUuid()));
 
             while (true) {
                 String callData = reader.readLine();
@@ -49,14 +53,14 @@ public class CallDataRecordReader {
                         .map(String::trim)
                         .toArray(String[]::new);
 
-                if (isValid(callData) && subscribers.containsKey(data[1])) {
+                if (isValid(callData) && correctPhoneTariff.containsKey(data[1])) {
 //                    log.info("Звонок добавлен в список [{}]", callData);
                     dataRecords.add(CallDataRecord.builder()
                             .callType(data[0])
                             .phoneNumber(data[1])
                             .callStart(data[2])
                             .callEnd(data[3])
-                            .tariffType(subscribers.get(data[1]))
+                            .tariffType(correctPhoneTariff.get(data[1]))
                             .build());
                 }
             }
@@ -93,7 +97,7 @@ public class CallDataRecordReader {
 
             String endInput = LocalDateTime.parse(end, INPUT_FORMATTER).format(OUTPUT_FORMATTER);
             LocalDateTime endDate = LocalDateTime.parse(endInput, OUTPUT_FORMATTER);
-            return startDate.isBefore(endDate);
+            return startDate.isBefore(endDate) && startDate.until(endDate, SECONDS) <= 86399;
         } catch (DateTimeParseException dtpe) {
             return false;
         }

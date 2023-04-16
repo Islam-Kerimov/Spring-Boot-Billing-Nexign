@@ -1,6 +1,5 @@
 package ru.nexign.spring.boot.billing.model.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubscriberDto {
+public class ChangeTariffResponse {
+
+    private Integer id;
     private String phoneNumber;
-    private Double balance;
+    private String tariffUuid;
 }

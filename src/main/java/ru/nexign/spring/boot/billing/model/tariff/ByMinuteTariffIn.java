@@ -1,10 +1,11 @@
 package ru.nexign.spring.boot.billing.model.tariff;
 
-import ru.nexign.spring.boot.billing.model.CallType;
+import ru.nexign.spring.boot.billing.model.entity.CallType;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
-public class ByMinuteTariff implements Tariff {
+public class ByMinuteTariffIn implements TariffIn {
     public static final double minRub = 1.5;
 
     @Override

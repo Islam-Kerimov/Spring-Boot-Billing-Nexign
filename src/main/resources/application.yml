@@ -16,5 +16,7 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+          batch_size: 50
+        order_updates: true
 #  flyway:
 #    baseline-on-migrate: true

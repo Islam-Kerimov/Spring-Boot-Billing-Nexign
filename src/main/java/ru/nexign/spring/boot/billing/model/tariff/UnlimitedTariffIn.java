@@ -1,10 +1,11 @@
 package ru.nexign.spring.boot.billing.model.tariff;
 
-import ru.nexign.spring.boot.billing.model.CallType;
+import ru.nexign.spring.boot.billing.model.entity.CallType;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
-public class UnlimitedTariff implements Tariff {
+public class UnlimitedTariffIn implements TariffIn {
     private static final double minRub = 1.0;
     private int unlimitedMinutes = 300;
 

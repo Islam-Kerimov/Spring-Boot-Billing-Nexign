@@ -1,4 +1,4 @@
-package ru.nexign.spring.boot.billing.model;
+package ru.nexign.spring.boot.billing.model.entity;
 
 public enum TariffType {
     UNLIMITED("06"),

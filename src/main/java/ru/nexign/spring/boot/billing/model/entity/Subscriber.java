@@ -1,31 +1,32 @@
 package ru.nexign.spring.boot.billing.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "subscriber")
+@Builder
 public class Subscriber implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "phone_number")
     private String phoneNumber;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tariff_id")
-    private TariffInfo tariffInfo;
-    @Column
-    private String uuid;
+    private Tariff tariff;
     private Double balance;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "operator_id")
     private Operator operator;
+
+//    @Builder.Default
+//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "subscriber", orphanRemoval = true)
+//    private List<BillingReport> billingReports = new ArrayList<>(0);
 }
