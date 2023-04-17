@@ -25,8 +25,4 @@ public class Subscriber implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "operator_id")
     private Operator operator;
-
-//    @Builder.Default
-//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "subscriber", orphanRemoval = true)
-//    private List<BillingReport> billingReports = new ArrayList<>(0);
 }

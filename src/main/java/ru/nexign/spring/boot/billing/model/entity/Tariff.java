@@ -32,6 +32,7 @@ public class Tariff implements Serializable {
     protected Boolean outgoingAnother;
     protected String monetaryUnit;
     protected String redirect;
+    protected String operator;
 
     @OneToMany(mappedBy = "tariff")
     private List<Subscriber> subscribers = new ArrayList<>();

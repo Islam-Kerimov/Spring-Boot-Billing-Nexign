@@ -13,15 +13,16 @@ CREATE TABLE IF NOT EXISTS tariff
     incoming_another BOOLEAN,
     outgoing_another BOOLEAN,
     monetary_unit    VARCHAR(64) DEFAULT 'rubles',
-    redirect         VARCHAR(2)
+    redirect         VARCHAR(2),
+    operator         VARCHAR(32)        NOT NULL
 );
 
 INSERT INTO tariff (uuid, name, fix_min, fix_price, first_min, first_price, minute_price, incoming_inside,
-                    outgoing_inside, incoming_another, outgoing_another, redirect)
-VALUES ('06', 'Безлимит 300', 300, 100, null, null, 1, null, null, null, null, null),
-       ('03', 'Поминутный', null, null, null, null, 1.5, null, null, null, null, null),
-       ('11', 'Обычный', null, null, 100, 0.5, null, true, null, true, null, '03'),
-       ('82', 'Х', null, null, null, null, null, true, true, null, null, '03');
+                    outgoing_inside, incoming_another, outgoing_another, redirect, operator)
+VALUES ('06', 'Безлимит 300', 300, 100, null, null, 1, null, null, null, null, null, 'Ромашка'),
+       ('03', 'Поминутный', null, null, null, null, 1.5, null, null, null, null, null, 'Ромашка'),
+       ('11', 'Обычный', null, null, 100, 0.5, null, true, null, true, null, '03', 'Ромашка'),
+       ('82', 'Х', null, null, null, null, null, true, true, null, null, '03', 'Ромашка');
 
 CREATE TABLE IF NOT EXISTS operator
 (

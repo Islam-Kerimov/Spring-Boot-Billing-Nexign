@@ -21,4 +21,6 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
     Set<Subscriber> findAllByPhoneNumberIn(Set<String> phoneNumbers);
 
     Optional<Subscriber> findByPhoneNumber(String phoneNumber);
+
+    Set<Subscriber> findAllByOperatorName(String operatorName);
 }

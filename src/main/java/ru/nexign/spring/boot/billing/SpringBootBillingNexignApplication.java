@@ -28,8 +28,7 @@ public class SpringBootBillingNexignApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        File data = new File("data");
-        boolean mkdir = data.mkdir();
+        boolean directory = (new File("data")).mkdir();
         String cdrPlusFile = billingRealTimeService.billing();
         Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost(cdrPlusFile);
         billingRealTimeService.updateBalance(totalCost);

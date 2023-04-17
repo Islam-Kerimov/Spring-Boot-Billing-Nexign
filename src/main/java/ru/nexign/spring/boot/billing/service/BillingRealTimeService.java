@@ -8,12 +8,9 @@ import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.io.File.separator;
 
@@ -45,9 +42,16 @@ public class BillingRealTimeService {
         return CDR_FILE_PLUS;
     }
 
+    @Transactional
     public void updateBalance(Map<String, Double> totalCost) {
         Set<Subscriber> subscribersUpdate = subscriberRepository.findAllByPhoneNumberIn(totalCost.keySet());
-        subscribersUpdate.forEach(s -> s.setBalance(s.getBalance() - totalCost.get(s.getPhoneNumber())));
+        subscribersUpdate.forEach(s -> {
+            Double fixPrice = s.getTariff().getFixPrice();
+            if (fixPrice != null && fixPrice > 0) {
+                s.setBalance(s.getBalance() - fixPrice);
+            }
+            s.setBalance(s.getBalance() - totalCost.get(s.getPhoneNumber()));
+        });
         subscriberRepository.saveAll(subscribersUpdate);
         log.info("Баланс {} абонентов изменен в соответствии с длительностью их разговоров", subscribersUpdate.size());
     }

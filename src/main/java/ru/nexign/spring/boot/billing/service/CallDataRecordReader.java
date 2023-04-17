@@ -3,9 +3,8 @@ package ru.nexign.spring.boot.billing.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.nexign.spring.boot.billing.model.entity.CallType;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
+import ru.nexign.spring.boot.billing.model.entity.CallType;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.repository.CallDataRecordRepository;
 
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 

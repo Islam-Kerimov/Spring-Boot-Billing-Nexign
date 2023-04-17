@@ -47,6 +47,11 @@ public class SubscriberController {
         Optional<Subscriber> subscriber = subscriberService.getSubscriber(phoneNumber);
 
         if (subscriber.isPresent()) {
+            Double fixPrice = subscriber.get().getTariff().getFixPrice();
+            if (fixPrice == null) {
+                fixPrice = 0.0;
+            }
+
             List<BillingReport> billingReport = billingReportService.getPayload(phoneNumber);
             List<BillingReportDto> billingReportDtos = billingReport.stream()
                     .map(v -> BillingReportDto.builder()
@@ -63,7 +68,7 @@ public class SubscriberController {
                     .tariffUuid(subscriber.get().getTariff().getUuid())
                     .operator(subscriber.get().getOperator().getName())
                     .payload(billingReportDtos)
-                    .totalCost(billingReport.stream()
+                    .totalCost(fixPrice + billingReport.stream()
                             .map(BillingReport::getCost)
                             .mapToDouble(Double::doubleValue)
                             .sum())

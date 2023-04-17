@@ -1,9 +1,7 @@
 package ru.nexign.spring.boot.billing.service;
 
-import com.fasterxml.jackson.annotation.ObjectIdResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.property.access.spi.PropertyAccessStrategyResolver;
 import org.springframework.stereotype.Service;
 import ru.nexign.spring.boot.billing.model.dto.NewSubscriberRequest;
 import ru.nexign.spring.boot.billing.model.entity.Operator;
