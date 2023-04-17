@@ -10,6 +10,7 @@ import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.service.BillingRealTimeService;
 import ru.nexign.spring.boot.billing.service.HighPerformanceRatingServerService;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,8 +28,10 @@ public class SpringBootBillingNexignApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        billingRealTimeService.billing();
-//        Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost();
-//        billingRealTimeService.updateBalance(totalCost);
+        File data = new File("data");
+        boolean mkdir = data.mkdir();
+        String cdrPlusFile = billingRealTimeService.billing();
+        Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost(cdrPlusFile);
+        billingRealTimeService.updateBalance(totalCost);
     }
 }

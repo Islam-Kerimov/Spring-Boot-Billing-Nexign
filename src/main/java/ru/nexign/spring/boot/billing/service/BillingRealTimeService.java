@@ -8,6 +8,7 @@ import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class BillingRealTimeService {
     private final SubscriberRepository subscriberRepository;
 
     @Transactional
-    public void billing() {
+    public String billing() {
         log.info("Выгрузка звонков всех абонентов в файл crd.txt");
         List<CallDataRecord> dataRecords = callDataRecordReader.read();
         int records = callDataRecordWriter.write(dataRecords, CDR_FILE);
@@ -41,6 +42,7 @@ public class BillingRealTimeService {
         List<CallDataRecord> dataRecordsWithTariff = callDataRecordReader.read(CDR_FILE, correctSubscribers);
         int validRecords = callDataRecordWriter.write(dataRecordsWithTariff, CDR_FILE_PLUS);
         log.info("Выгружено {} звонков в файл crd+.txt", validRecords);
+        return CDR_FILE_PLUS;
     }
 
     public void updateBalance(Map<String, Double> totalCost) {

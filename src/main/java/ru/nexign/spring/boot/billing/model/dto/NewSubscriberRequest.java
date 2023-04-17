@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewSubscriberRequest {
-    private String phoneNumber;
-    private String tariffUuid;
-    private Double balance;
-    private String operator;
+	private String phoneNumber;
+	private String tariffUuid;
+	private Double balance;
+	private String operator;
 }

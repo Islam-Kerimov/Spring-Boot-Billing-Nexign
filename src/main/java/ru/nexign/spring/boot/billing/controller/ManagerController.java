@@ -14,15 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static ru.nexign.spring.boot.billing.model.dto.SubscriberDto.builder;
-
 @RestController
 @RequestMapping(value = "/manager")
 @RequiredArgsConstructor
 @Slf4j
 public class ManagerController {
-    private final SubscriberRepository subscriberRepository;
-
     private final BillingRealTimeService billingRealTimeService;
     private final HighPerformanceRatingServerService highPerformanceRatingServerService;
     private final SubscriberService subscriberService;
@@ -56,15 +52,15 @@ public class ManagerController {
     public BillingResponse getAllCurrencies(@RequestBody BillingRequest request) {
         if (request.getAction().equals("run")) {
             // тарификация
-            billingRealTimeService.billing();
-            Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost();
+            String cdrPlusFile = billingRealTimeService.billing();
+            Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost(cdrPlusFile);
             billingRealTimeService.updateBalance(totalCost);
 
             // создание респонса
             List<Subscriber> subscribers = subscriberService.getAllSubscribers();
             return BillingResponse.builder()
                     .numbers(subscribers.stream()
-                            .map(data -> builder()
+                            .map(data -> SubscriberDto.builder()
                                     .phoneNumber(data.getPhoneNumber())
                                     .balance(data.getBalance())
                                     .build())
@@ -80,7 +76,7 @@ public class ManagerController {
         List<Subscriber> subscribers = subscriberService.getAllSubscribers();
         return BillingResponse.builder()
                 .numbers(subscribers.stream()
-                        .map(data -> builder()
+                        .map(data -> SubscriberDto.builder()
                                 .phoneNumber(data.getPhoneNumber())
                                 .balance(data.getBalance())
                                 .build())

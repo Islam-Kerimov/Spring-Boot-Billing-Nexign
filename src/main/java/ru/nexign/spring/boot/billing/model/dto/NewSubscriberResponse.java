@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewSubscriberResponse {
-    private Integer id;
-    private String phoneNumber;
-    private String tariffUuid;
-    private Double balance;
-    private String operator;
+	private Integer id;
+	private String phoneNumber;
+	private String tariffUuid;
+	private Double balance;
+	private String operator;
 }

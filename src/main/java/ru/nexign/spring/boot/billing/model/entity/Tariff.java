@@ -18,20 +18,20 @@ public class Tariff implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    private Integer id;
-    private String uuid;
-    private String name;
-    private Integer fixMin;
-    private Double fixPrice;
-    private Integer firstMin;
-    private Double firstPrice;
-    private Double minutePrice;
-    private Boolean incomingInside;
-    private Boolean outgoingInside;
-    private Boolean incomingAnother;
-    private Boolean outgoingAnother;
-    private String monetaryUnit;
-    private String redirect;
+    protected Integer id;
+    protected String uuid;
+    protected String name;
+    protected Integer fixMin;
+    protected Double fixPrice;
+    protected Integer firstMin;
+    protected Double firstPrice;
+    protected Double minutePrice;
+    protected Boolean incomingInside;
+    protected Boolean outgoingInside;
+    protected Boolean incomingAnother;
+    protected Boolean outgoingAnother;
+    protected String monetaryUnit;
+    protected String redirect;
 
     @OneToMany(mappedBy = "tariff")
     private List<Subscriber> subscribers = new ArrayList<>();
