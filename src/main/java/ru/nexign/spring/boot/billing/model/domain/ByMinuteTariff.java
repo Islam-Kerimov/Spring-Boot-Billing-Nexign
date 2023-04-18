@@ -16,7 +16,7 @@ public class ByMinuteTariff implements TariffPlan {
     private double minutePrice;
 
     @Override
-    public double addCost(LocalTime duration, CallType callType, Boolean operator) {
+    public double getCost(LocalTime duration, CallType callType, Boolean operator) {
         int minutes = duration.getHour() * 60 + duration.getMinute();
         if (duration.getSecond() > 0) {
             minutes += 1;

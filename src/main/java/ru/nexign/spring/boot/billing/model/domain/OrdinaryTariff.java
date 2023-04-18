@@ -21,7 +21,7 @@ public class OrdinaryTariff implements TariffPlan {
     private ByMinuteTariff byMinuteTariff;
 
     @Override
-    public double addCost(LocalTime duration, CallType callType, Boolean operator) {
+    public double getCost(LocalTime duration, CallType callType, Boolean operator) {
         if (CallType.INCOMING.equals(callType) && incomingAnother && incomingInside) {
             return 0;
         }

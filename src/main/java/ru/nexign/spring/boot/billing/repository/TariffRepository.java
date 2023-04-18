@@ -10,4 +10,6 @@ import java.util.Set;
 public interface TariffRepository extends JpaRepository<Tariff, Integer> {
 
     Optional<Tariff> findByUuid(String uuid);
+
+    Boolean existsByUuid(String uuid);
 }

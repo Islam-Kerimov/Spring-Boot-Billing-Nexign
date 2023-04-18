@@ -37,10 +37,10 @@ VALUES ('Ромашка'),
 CREATE TABLE IF NOT EXISTS subscriber
 (
     id           SERIAL PRIMARY KEY,
-    phone_number VARCHAR(11) UNIQUE NOT NULL,
-    tariff_id    INT REFERENCES tariff (id),
+    phone_number VARCHAR(11) UNIQUE           NOT NULL,
+    tariff_id    INT REFERENCES tariff (id)   NOT NULL,
     balance      NUMERIC(9, 2) DEFAULT 0.00,
-    operator_id  INT REFERENCES operator (id)
+    operator_id  INT REFERENCES operator (id) NOT NULL
 );
 
 INSERT INTO subscriber(phone_number, tariff_id, balance, operator_id)
@@ -106,12 +106,12 @@ VALUES ('79210017003', 1, 0, 1);
 CREATE TABLE IF NOT EXISTS billing_report
 (
     id           SERIAL PRIMARY KEY,
-    phone_number VARCHAR REFERENCES subscriber (phone_number),
-    call_type    VARCHAR(2),
-    call_start   TIMESTAMP     NOT NULL,
-    call_end     TIMESTAMP     NOT NULL,
-    duration     TIME          NOT NULL,
-    cost         NUMERIC(9, 2) NOT NULL,
+    phone_number VARCHAR REFERENCES subscriber (phone_number) NOT NULL,
+    call_type    VARCHAR(2)                                   NOT NULL,
+    call_start   TIMESTAMP                                    NOT NULL,
+    call_end     TIMESTAMP                                    NOT NULL,
+    duration     TIME                                         NOT NULL,
+    cost         NUMERIC(9, 2)                                NOT NULL,
     CONSTRAINT unique_report UNIQUE (phone_number, call_type, call_start, call_end, cost)
 );
 
@@ -219,11 +219,6 @@ VALUES ('02', '79181234597', '20230408161800', '20230408160800'),
 INSERT INTO cdr_info (call_type, phone_number, call_start, call_end)
 VALUES ('02', '79210017003', '20230408000000', '20230408010000');
 
-
-
--- INSERT INTO billing_report (phone_number, call_type, call_start, call_end, duration, cost)
--- VALUES ('79181234582', '02', '2023-04-22 12:12:12.000000', '2023-04-22 12:52:12.000000', 2400, 0.00)
--- ON CONFLICT ON CONSTRAINT un_report DO NOTHING;
 
 
 

@@ -7,5 +7,5 @@ import java.time.LocalTime;
 
 public interface TariffPlan {
 
-    double addCost(LocalTime duration, CallType callType, Boolean operator);
+    double getCost(LocalTime duration, CallType callType, Boolean operator);
 }

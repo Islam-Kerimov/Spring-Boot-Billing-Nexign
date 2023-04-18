@@ -32,14 +32,9 @@ public class CallDataRecordReader {
         return repository.findAll();
     }
 
-    public List<CallDataRecord> read(String cdrFile, Set<Subscriber> correctSubscribers) {
+    public List<CallDataRecord> read(String cdrFile, Map<String, String> correctPhoneNumberAndTariff) {
         List<CallDataRecord> dataRecords = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(cdrFile))) {
-
-            Map<String, String> correctPhoneTariff = correctSubscribers.stream()
-                    .collect(Collectors.toMap(
-                            Subscriber::getPhoneNumber,
-                            e -> e.getTariff().getUuid()));
 
             while (true) {
                 String callData = reader.readLine();
@@ -51,14 +46,14 @@ public class CallDataRecordReader {
                         .map(String::trim)
                         .toArray(String[]::new);
 
-                if (isValid(callData) && correctPhoneTariff.containsKey(data[1])) {
+                if (isValid(callData) && correctPhoneNumberAndTariff.containsKey(data[1])) {
 //                    log.info("Звонок добавлен в список [{}]", callData);
                     dataRecords.add(CallDataRecord.builder()
                             .callType(data[0])
                             .phoneNumber(data[1])
                             .callStart(data[2])
                             .callEnd(data[3])
-                            .tariffType(correctPhoneTariff.get(data[1]))
+                            .tariffType(correctPhoneNumberAndTariff.get(data[1]))
                             .build());
                 }
             }
