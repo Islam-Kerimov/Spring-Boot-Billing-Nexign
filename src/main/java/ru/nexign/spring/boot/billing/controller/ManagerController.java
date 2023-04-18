@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.nexign.spring.boot.billing.model.dto.*;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
+import ru.nexign.spring.boot.billing.model.entity.Tariff;
 import ru.nexign.spring.boot.billing.service.BillingRealTimeService;
 import ru.nexign.spring.boot.billing.service.HighPerformanceRatingServerService;
 import ru.nexign.spring.boot.billing.service.SubscriberService;
+import ru.nexign.spring.boot.billing.service.TariffService;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ public class ManagerController {
 	private final BillingRealTimeService billingRealTimeService;
 	private final HighPerformanceRatingServerService highPerformanceRatingServerService;
 	private final SubscriberService subscriberService;
+	private final TariffService tariffService;
 //    private final SubscriberMapper subscriberMapper;
 
 
@@ -51,6 +54,32 @@ public class ManagerController {
 			.balance(value.getBalance())
 			.operator(value.getOperator().getName())
 			.build()).orElse(null);
+	}
+
+	@PostMapping("/tariff")
+	public NewTariffResponse createTariff(@RequestBody NewTariffRequest request) {
+		Tariff tariff = tariffService.createTariff(request);
+		if (tariff == null) {
+			return null;
+		}
+
+		return NewTariffResponse.builder()
+			.id(tariff.getId())
+			.uuid(tariff.getUuid())
+			.name(tariff.getName())
+			.fixMin(tariff.getFixMin())
+			.fixPrice(tariff.getFixPrice())
+			.firstMin(tariff.getFirstMin())
+			.firstPrice(tariff.getFirstPrice())
+			.minutePrice(tariff.getMinutePrice())
+			.incomingInside(tariff.getIncomingInside())
+			.outgoingInside(tariff.getOutgoingInside())
+			.incomingAnother(tariff.getIncomingAnother())
+			.outgoingAnother(tariff.getOutgoingAnother())
+			.monetaryUnit(tariff.getMonetaryUnit())
+			.redirect(tariff.getRedirect())
+			.operator(tariff.getOperator())
+			.build();
 	}
 
 	@PatchMapping("/billing")
