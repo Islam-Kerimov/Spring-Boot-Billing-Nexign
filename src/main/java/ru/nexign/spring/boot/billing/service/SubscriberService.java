@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nexign.spring.boot.billing.model.dto.NewSubscriberRequest;
-import ru.nexign.spring.boot.billing.model.entity.Operator;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.model.entity.Tariff;
 import ru.nexign.spring.boot.billing.repository.OperatorRepository;
@@ -29,12 +27,13 @@ public class SubscriberService {
 		return subscriberRepository.findAll();
 	}
 
-	public Optional<Subscriber> updateTariff(String phoneNumber, String newTariffUuid) {
-		return subscriberRepository.findByPhoneNumber(phoneNumber)
+	public Optional<Subscriber> updateTariff(Subscriber subscriber) {
+		return subscriberRepository.findByPhoneNumber(subscriber.getPhoneNumber())
 			.map(entity -> {
-				Optional<Tariff> byUuid = tariffRepository.findByUuid(newTariffUuid);
+				Optional<Tariff> byUuid = tariffRepository.findByUuid(subscriber.getTariff().getUuid());
 				if (byUuid.isPresent()) {
-					log.info("Updating tariff {} on {} by phone_number {}", byUuid.get().getUuid(), newTariffUuid, phoneNumber);
+					log.info("Updating tariff {} on {} by phone_number {}", byUuid.get().getUuid(),
+						subscriber.getTariff().getUuid(), subscriber.getPhoneNumber());
 					entity.setTariff(byUuid.get());
 					subscriberRepository.saveAndFlush(entity);
 					return entity;
@@ -43,25 +42,32 @@ public class SubscriberService {
 			});
 	}
 
-	public Optional<Subscriber> updateBalance(String phoneNumber, Double balance) {
-		return subscriberRepository.findByPhoneNumber(phoneNumber)
+	public Optional<Subscriber> updateBalance(Subscriber subscriber) {
+		return subscriberRepository.findByPhoneNumber(subscriber.getPhoneNumber())
 			.map(entity -> {
-				log.info("Replenishment of the balance on '{}' of the phone_number {}", balance, phoneNumber);
-				entity.setBalance(entity.getBalance() + balance);
+				log.info("Replenishment of the balance on '{}' of the phone_number {}", subscriber.getBalance(), subscriber.getPhoneNumber());
+				entity.setBalance(entity.getBalance() + subscriber.getBalance());
 				subscriberRepository.saveAndFlush(entity);
 				return entity;
 			});
 	}
 
 	@Transactional
-	public int createSubscriber(NewSubscriberRequest request) {
-		if (!subscriberRepository.existsByPhoneNumber(request.getPhoneNumber()) &&
-			tariffRepository.existsByUuid(request.getTariffUuid()) &&
-			operatorRepository.existsByName(request.getOperator())) {
+	public Optional<Subscriber> createSubscriber(Subscriber subscriber) {
+		if (!subscriberRepository.existsByPhoneNumber(subscriber.getPhoneNumber()) &&
+			tariffRepository.existsByUuid(subscriber.getTariff().getUuid()) &&
+			operatorRepository.existsByName(subscriber.getOperator().getName())) {
 
-			return subscriberRepository.saveBy(request.getPhoneNumber(), request.getTariffUuid(), request.getBalance(), request.getOperator());
+			int isSave = subscriberRepository.saveBy(
+				subscriber.getPhoneNumber(),
+				subscriber.getTariff().getUuid(),
+				subscriber.getBalance(),
+				subscriber.getOperator().getName());
+			if (isSave > 0) {
+				return getSubscriber(subscriber.getPhoneNumber());
+			}
 		}
-		return 0;
+		return Optional.empty();
 	}
 
 	public Optional<Subscriber> getSubscriber(String phoneNumber) {

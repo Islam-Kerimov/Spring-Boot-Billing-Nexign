@@ -1,42 +1,52 @@
 package ru.nexign.spring.boot.billing.model.mapper;
 
-//import org.mapstruct.IterableMapping;
-//import org.mapstruct.Mapper;
-//import org.mapstruct.Mapping;
-//import org.mapstruct.Named;
-import ru.nexign.spring.boot.billing.model.dto.BillingResponse;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import ru.nexign.spring.boot.billing.model.dto.*;
+import ru.nexign.spring.boot.billing.model.entity.BillingReport;
+import ru.nexign.spring.boot.billing.model.entity.Operator;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
+import ru.nexign.spring.boot.billing.model.entity.Tariff;
 
 import java.util.List;
 
-//@Mapper(componentModel = "spring")
-public interface SubscriberMapper {
-    BillingResponse entitySubscriberListToDtoList(List<Subscriber> subscribers);
+@Mapper(componentModel = "spring", uses = BillingReportMapper.class)
+public abstract class SubscriberMapper {
 
-//    @Named("Source")
-//    NewsSourceDto entityNewsSourceToDto(NewsSource newsSource);
-//
-//    NewsSource dtoNewsSourceToEntity(NewsSourceDto newsSourceDto);
-//
-//    @IterableMapping(qualifiedByName = "Source")
-//    List<NewsSourceDto> entityNewsSourceListToDtoList(List<NewsSource> sources);
-//
-//    @Named("Topic")
-//    NewsTopicDto entityNewsTopicToDto(NewsTopic newsTopic);
-//
-//    NewsTopic dtoNewsTopicToEntity(NewsTopicDto topicDto);
-//
-//    @IterableMapping(qualifiedByName = "Topic")
-//    List<NewsTopicDto> entityNewsTopicListToDtoList(List<NewsTopic> topics);
-//
-//    @Named("News")
-//    @Mapping(target = "source", source = "newsTopic.newsSource.name")
-//    @Mapping(target = "topic", source = "newsTopic.name")
-//    NewsBodyDto entityNewsBodyToDto(NewsBody newsBody);
-//
-//    @IterableMapping(qualifiedByName = "News")
-//    List<NewsBodyDto> entityNewsBodyListToDtoList(List<NewsBody> news);
-//
-//    NewsBody dtoNewsBodyToEntity(NewsBodyDto newsBodyDto);
+	public Subscriber subscriberDtoToSubscriber(SubscriberDto subscriberDto) {
+		if (subscriberDto == null) {
+			return null;
+		}
+
+		Subscriber.SubscriberBuilder subscriber = Subscriber.builder();
+
+		subscriber.phoneNumber(subscriberDto.getPhoneNumber());
+		subscriber.tariff(Tariff.builder().uuid(subscriberDto.getTariffUuid()).build());
+		subscriber.balance(subscriberDto.getBalance());
+		subscriber.operator(Operator.builder().name(subscriberDto.getOperator()).build());
+
+		return subscriber.build();
+	}
+
+	@Named("subscriber")
+	@Mapping(target = "tariffUuid", source = "subscriber.tariff.uuid")
+	@Mapping(target = "operator", source = "subscriber.operator.name")
+	public abstract SubscriberDto subscriberToSubscriberDto(Subscriber subscriber);
+
+	@IterableMapping(qualifiedByName = "subscriber")
+	public abstract List<SubscriberDto> subscriberListToSubscriberDtoList(List<Subscriber> subscribers);
+
+	@Mapping(target = "tariffUuid", source = "subscriber.tariff.uuid")
+	@Mapping(target = "operator", source = "subscriber.operator.name")
+	@Mapping(target = "monetaryUnit", source = "subscriber.tariff.monetaryUnit")
+	@Mapping(target = "payload", source = "billingReports")
+	@Mapping(target = "totalCost", source = "totalCost")
+	public abstract ReportResponse subscriberBillingToReportResponse(Subscriber subscriber, List<BillingReport> billingReports, Double totalCost);
+
+	public abstract Subscriber payRequestToSubscriber(PayRequest request);
+
+	public abstract PayResponse subscriberToPayResponse(Subscriber subscriber);
 }
 

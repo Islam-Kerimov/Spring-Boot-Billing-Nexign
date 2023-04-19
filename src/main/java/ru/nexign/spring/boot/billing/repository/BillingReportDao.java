@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.nexign.spring.boot.billing.model.entity.BillingReport;
 
-import java.time.Period;
 import java.util.*;
 
 @Repository

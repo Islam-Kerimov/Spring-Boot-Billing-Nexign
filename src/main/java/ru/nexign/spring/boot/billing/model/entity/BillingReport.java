@@ -2,9 +2,9 @@ package ru.nexign.spring.boot.billing.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.nexign.spring.boot.billing.model.domain.TariffType;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 

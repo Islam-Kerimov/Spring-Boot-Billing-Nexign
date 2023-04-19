@@ -4,9 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.nexign.spring.boot.billing.model.dto.*;
+import ru.nexign.spring.boot.billing.model.dto.BillingRequest;
+import ru.nexign.spring.boot.billing.model.dto.BillingResponse;
+import ru.nexign.spring.boot.billing.model.dto.SubscriberDto;
+import ru.nexign.spring.boot.billing.model.dto.TariffDto;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.model.entity.Tariff;
+import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
+import ru.nexign.spring.boot.billing.model.mapper.TariffMapper;
 import ru.nexign.spring.boot.billing.service.BillingRealTimeService;
 import ru.nexign.spring.boot.billing.service.HighPerformanceRatingServerService;
 import ru.nexign.spring.boot.billing.service.SubscriberService;
@@ -26,62 +31,31 @@ public class ManagerController {
 	private final HighPerformanceRatingServerService highPerformanceRatingServerService;
 	private final SubscriberService subscriberService;
 	private final TariffService tariffService;
-//    private final SubscriberMapper subscriberMapper;
+	private final SubscriberMapper subscriberMapper;
+	private final TariffMapper tariffMapper;
 
 
+	@Transactional
 	@PatchMapping("/changeTariff")
-	public ChangeTariffResponse updateTariff(@RequestBody ChangeTariffRequest request) {
-		Optional<Subscriber> subscriber = subscriberService.updateTariff(request.getPhoneNumber(), request.getTariffUuid());
-
-		return subscriber.map(value -> ChangeTariffResponse.builder()
-			.id(value.getId())
-			.phoneNumber(value.getPhoneNumber())
-			.tariffUuid(value.getTariff().getUuid())
-			.build()).orElse(null);
+	public SubscriberDto updateTariff(@RequestBody SubscriberDto request) {
+		Optional<Subscriber> subscriber = subscriberService.updateTariff(subscriberMapper.subscriberDtoToSubscriber(request));
+		return subscriber.map(subscriberMapper::subscriberToSubscriberDto).orElse(null);
 	}
 
 	@Transactional
 	@PostMapping("/abonent")
-	public NewSubscriberResponse createSubscriber(@RequestBody NewSubscriberRequest request) {
-		Optional<Subscriber> subscriber = Optional.empty();
-		if (subscriberService.createSubscriber(request) > 0) {
-			subscriber = subscriberService.getSubscriber(request.getPhoneNumber());
-		}
-		return subscriber.map(value -> NewSubscriberResponse.builder()
-			.id(value.getId())
-			.phoneNumber(value.getPhoneNumber())
-			.tariffUuid(value.getTariff().getUuid())
-			.balance(value.getBalance())
-			.operator(value.getOperator().getName())
-			.build()).orElse(null);
+	public SubscriberDto createSubscriber(@RequestBody SubscriberDto request) {
+		Optional<Subscriber> subscriber = subscriberService.createSubscriber(subscriberMapper.subscriberDtoToSubscriber(request));
+		return subscriber.map(subscriberMapper::subscriberToSubscriberDto).orElse(null);
 	}
 
 	@PostMapping("/tariff")
-	public NewTariffResponse createTariff(@RequestBody NewTariffRequest request) {
-		Tariff tariff = tariffService.createTariff(request);
-		if (tariff == null) {
-			return null;
-		}
-
-		return NewTariffResponse.builder()
-			.id(tariff.getId())
-			.uuid(tariff.getUuid())
-			.name(tariff.getName())
-			.fixMin(tariff.getFixMin())
-			.fixPrice(tariff.getFixPrice())
-			.firstMin(tariff.getFirstMin())
-			.firstPrice(tariff.getFirstPrice())
-			.minutePrice(tariff.getMinutePrice())
-			.incomingInside(tariff.getIncomingInside())
-			.outgoingInside(tariff.getOutgoingInside())
-			.incomingAnother(tariff.getIncomingAnother())
-			.outgoingAnother(tariff.getOutgoingAnother())
-			.monetaryUnit(tariff.getMonetaryUnit())
-			.redirect(tariff.getRedirect())
-			.operator(tariff.getOperator())
-			.build();
+	public TariffDto createTariff(@RequestBody TariffDto request) {
+		Optional<Tariff> tariff = Optional.ofNullable(tariffService.createTariff(tariffMapper.tariffDtoToTariff(request)));
+		return tariff.map(tariffMapper::tariffToTariffDto).orElse(null);
 	}
 
+	@Transactional
 	@PatchMapping("/billing")
 	public BillingResponse getAllCurrencies(@RequestBody BillingRequest request) {
 		if (request.getAction().equals("run")) {
@@ -94,28 +68,18 @@ public class ManagerController {
 //			return getAllSubscribers();
 			Set<Subscriber> subscribers = subscriberService.getAllBillingSubscribers(totalCost.keySet());
 			return BillingResponse.builder()
-				.numbers(subscribers.stream()
-					.map(data -> SubscriberDto.builder()
-						.phoneNumber(data.getPhoneNumber())
-						.balance(data.getBalance())
-						.build())
-					.toList())
+				.numbers(subscriberMapper.subscriberListToSubscriberDtoList(subscribers.stream().toList()))
 				.build();
-//            return subscriberMapper.entitySubscriberListToDtoList(subscribers);
 		}
 		return null;
 	}
 
+	@Transactional
 	@GetMapping("/abonents")
 	public BillingResponse getAllSubscribers() {
 		List<Subscriber> subscribers = subscriberService.getAllSubscribers();
 		return BillingResponse.builder()
-			.numbers(subscribers.stream()
-				.map(data -> SubscriberDto.builder()
-					.phoneNumber(data.getPhoneNumber())
-					.balance(data.getBalance())
-					.build())
-				.toList())
+			.numbers(subscriberMapper.subscriberListToSubscriberDtoList(subscribers))
 			.build();
 	}
 }

@@ -3,8 +3,14 @@ package ru.nexign.spring.boot.billing.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.nexign.spring.boot.billing.model.domain.*;
-import ru.nexign.spring.boot.billing.model.entity.*;
+import ru.nexign.spring.boot.billing.model.domain.CallType;
+import ru.nexign.spring.boot.billing.model.domain.TariffPlan;
+import ru.nexign.spring.boot.billing.model.domain.TariffType;
+import ru.nexign.spring.boot.billing.model.entity.BillingReport;
+import ru.nexign.spring.boot.billing.model.entity.Subscriber;
+import ru.nexign.spring.boot.billing.model.entity.Tariff;
+import ru.nexign.spring.boot.billing.model.mapper.BillingReportMapper;
+import ru.nexign.spring.boot.billing.model.mapper.TariffPlanMapper;
 import ru.nexign.spring.boot.billing.repository.BillingReportDao;
 import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
 import ru.nexign.spring.boot.billing.repository.TariffRepository;
@@ -12,28 +18,22 @@ import ru.nexign.spring.boot.billing.repository.TariffRepository;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toMap;
-import static ru.nexign.spring.boot.billing.model.entity.TariffType.BY_MINUTE;
+import static ru.nexign.spring.boot.billing.model.domain.TariffType.BY_MINUTE;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class HighPerformanceRatingServerService {
-	private static final DateTimeFormatter INPUT_FORMATTER = ofPattern("yyyyMMddHHmmss");
-	private static final DateTimeFormatter OUTPUT_FORMATTER = ofPattern("yyyy-MM-dd HH:mm:ss");
-
 	private final BillingReportDao billingReportDao;
 	private final TariffRepository tariffRepository;
 	private final SubscriberRepository subscriberRepository;
+	private final TariffPlanMapper tariffPlanMapper;
+	private final BillingReportMapper billingReportMapper;
 
 	public Map<String, Double> computeSubscriberTotalCost(String cdrPlusFile) {
 		Map<String, Double> totalCost;
@@ -41,9 +41,7 @@ public class HighPerformanceRatingServerService {
 		try (BufferedReader reader = new BufferedReader(new FileReader(cdrPlusFile))) {
 
 			Map<String, Set<BillingReport>> allReports = readAllFile(reader);
-			calculateCost(allReports);
 			log.info("Посчитана стоимость звонков всех абонентов");
-
 
 			Set<BillingReport> reports = allReports.entrySet().stream()
 				.flatMap(v -> v.getValue().stream())
@@ -67,14 +65,42 @@ public class HighPerformanceRatingServerService {
 		return totalCost;
 	}
 
-	private void calculateCost(Map<String, Set<BillingReport>> allReports) {
+	private Map<String, Set<BillingReport>> readAllFile(BufferedReader reader) throws IOException {
+		Map<String, Set<BillingReport>> reports = new HashMap<>();
+		while (true) {
+			String callData = reader.readLine();
+			if (callData == null || callData.isEmpty()) {
+				break;
+			}
+
+			String[] data = Arrays.stream(callData.split(","))
+				.map(String::trim)
+				.toArray(String[]::new);
+			BillingReport billingReport = billingReportMapper.cdrPlusToBillingReport(data);
+
+			Set<BillingReport> infos;
+			if (reports.containsKey(data[1])) {
+				infos = reports.get(data[1]);
+			} else {
+				infos = new TreeSet<>(comparing(BillingReport::getCallStart));
+			}
+			infos.add(billingReport);
+			reports.put(data[1], infos);
+		}
+
+		calculateCost(reports);
+
+		return reports;
+	}
+
+	private void calculateCost(Map<String, Set<BillingReport>> reports) {
 		Map<TariffType, Tariff> tariffMap = tariffRepository.findAll().stream()
 			.collect(Collectors.toMap(t -> TariffType.fromString(t.getUuid()), t -> t));
 		Set<String> byOperatorName = subscriberRepository.findAllByOperatorName("Ромашка").stream()
 			.map(Subscriber::getPhoneNumber)
 			.collect(Collectors.toSet());
 
-		for (Map.Entry<String, Set<BillingReport>> subscriberReport : allReports.entrySet()) {
+		for (Map.Entry<String, Set<BillingReport>> subscriberReport : reports.entrySet()) {
 			Optional<TariffType> tariffType = subscriberReport.getValue().stream()
 				.map(BillingReport::getTariffType)
 				.findAny();
@@ -84,38 +110,11 @@ public class HighPerformanceRatingServerService {
 
 				TariffPlan tariffPlan = null;
 				switch (TariffType.fromString(tariff.getUuid())) {
-					case BY_MINUTE -> tariffPlan = ByMinuteTariff.builder()
-						.minutePrice(tariff.getMinutePrice())
-						.build();
-					case UNLIMITED -> tariffPlan = UnlimitedTariff.builder()
-						.fixMin(tariff.getFixMin())
-						.fixPrice(tariff.getFixPrice())
-						.minutePrice(tariff.getMinutePrice())
-						.build();
-					case ORDINARY -> {
-						Tariff byMinute = tariffMap.get(BY_MINUTE);
-						tariffPlan = OrdinaryTariff.builder()
-							.incomingAnother(tariff.getIncomingAnother())
-							.incomingInside(tariff.getIncomingInside())
-							.firstMin(tariff.getFirstMin())
-							.firstPrice(tariff.getFirstPrice())
-							.operator(tariff.getOperator())
-							.byMinuteTariff(ByMinuteTariff.builder()
-								.minutePrice(byMinute.getMinutePrice())
-								.build())
-							.build();
-					}
-					case X -> {
-						Tariff byMinute = tariffMap.get(BY_MINUTE);
-						tariffPlan = XTariff.builder()
-							.incomingInside(tariff.getIncomingInside())
-							.outgoingInside(tariff.getOutgoingInside())
-							.operator(tariff.getOperator())
-							.byMinuteTariff(ByMinuteTariff.builder()
-								.minutePrice(byMinute.getMinutePrice())
-								.build())
-							.build();
-					}
+					case BY_MINUTE -> tariffPlan = tariffPlanMapper.tariffToByMinuteTariff(tariff);
+					case UNLIMITED -> tariffPlan = tariffPlanMapper.tariffToUnlimitedTariff(tariff);
+					case ORDINARY ->
+						tariffPlan = tariffPlanMapper.tariffToOrdinaryTariff(tariff, tariffMap.get(BY_MINUTE));
+					case X -> tariffPlan = tariffPlanMapper.tariffToXTariff(tariff, tariffMap.get(BY_MINUTE));
 				}
 				addCostCall(subscriberReport.getValue(), tariffPlan, byOperatorName.contains(subscriberReport.getKey()));
 			}
@@ -127,51 +126,5 @@ public class HighPerformanceRatingServerService {
 			double cost = tariff.getCost(report.getDuration(), CallType.fromString(report.getCallType()), operatorRomashka);
 			report.setCost(cost);
 		}
-	}
-
-	private Map<String, Set<BillingReport>> readAllFile(BufferedReader reader) throws IOException {
-		Map<String, Set<BillingReport>> map = new HashMap<>();
-		while (true) {
-			String callData = reader.readLine();
-			if (callData == null || callData.isEmpty()) {
-				break;
-			}
-
-			String[] data = Arrays.stream(callData.split(","))
-				.map(String::trim)
-				.toArray(String[]::new);
-			BillingReport billingReport = getBillingReport(data);
-
-			Set<BillingReport> infos;
-			if (map.containsKey(data[1])) {
-				infos = map.get(data[1]);
-			} else {
-				infos = new TreeSet<>(comparing(BillingReport::getCallStart));
-			}
-			infos.add(billingReport);
-			map.put(data[1], infos);
-		}
-		return map;
-	}
-
-	private BillingReport getBillingReport(String[] info) {
-		BillingReport billingReport = new BillingReport();
-		billingReport.setCallType(info[0]);
-		billingReport.setPhoneNumber(info[1]);
-		billingReport.setCallStart(getDateTime(info[2]));
-		billingReport.setCallEnd(getDateTime(info[3]));
-		billingReport.setDuration(getDurationTime(billingReport.getCallStart(), billingReport.getCallEnd()));
-		billingReport.setTariffType(TariffType.fromString(info[4]));
-		return billingReport;
-	}
-
-	private LocalDateTime getDateTime(String str) {
-		String inputFormat = LocalDateTime.parse(str, INPUT_FORMATTER).format(OUTPUT_FORMATTER);
-		return LocalDateTime.parse(inputFormat, OUTPUT_FORMATTER);
-	}
-
-	private LocalTime getDurationTime(LocalDateTime start, LocalDateTime end) {
-		long timeSeconds = start.until(end, SECONDS);
-		return LocalTime.ofSecondOfDay(timeSeconds);
 	}
 }

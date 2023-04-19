@@ -15,7 +15,7 @@ public class BillingReportService {
 
     private final BillingReportRepository billingReportRepository;
 
-    public List<BillingReport> getPayload(String phoneNumber) {
+    public List<BillingReport> getAllBillingReportBy(String phoneNumber) {
         return billingReportRepository.findAllByPhoneNumber(phoneNumber);
     }
 }

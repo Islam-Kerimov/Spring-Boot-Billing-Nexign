@@ -4,9 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.nexign.spring.boot.billing.model.dto.*;
+import ru.nexign.spring.boot.billing.model.dto.SubscriberDto;
+import ru.nexign.spring.boot.billing.model.dto.PayRequest;
+import ru.nexign.spring.boot.billing.model.dto.PayResponse;
+import ru.nexign.spring.boot.billing.model.dto.ReportResponse;
 import ru.nexign.spring.boot.billing.model.entity.BillingReport;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
+import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
 import ru.nexign.spring.boot.billing.service.BillingReportService;
 import ru.nexign.spring.boot.billing.service.SubscriberService;
 
@@ -18,63 +22,40 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriberController {
-    private final SubscriberService subscriberService;
-    private final BillingReportService billingReportService;
+	private final SubscriberService subscriberService;
+	private final BillingReportService billingReportService;
+	private final SubscriberMapper subscriberMapper;
 
-    @PatchMapping("/pay")
-    public PayResponse getAllCurrencies(@RequestBody PayRequest request) {
-        Optional<Subscriber> subscriber = subscriberService.updateBalance(request.getPhoneNumber(), request.getBalance());
+	@PatchMapping("/pay")
+	public PayResponse getAllCurrencies(@RequestBody PayRequest request) {
+		Optional<Subscriber> subscriber = subscriberService.updateBalance(subscriberMapper.payRequestToSubscriber(request));
+		return subscriber.map(subscriberMapper::subscriberToPayResponse).orElse(null);
+	}
 
-        return subscriber.map(value -> PayResponse.builder()
-                .id(value.getId())
-                .phoneNumber(value.getPhoneNumber())
-                .balance(value.getBalance())
-                .build()).orElse(null);
-    }
+	@GetMapping("/balance/{phoneNumber}")
+	public SubscriberDto getBalance(@PathVariable String phoneNumber) {
+		Optional<Subscriber> byPhoneNumber = subscriberService.getSubscriber(phoneNumber);
+		return byPhoneNumber.map(subscriberMapper::subscriberToSubscriberDto).orElse(null);
+	}
 
-    @GetMapping("/balance/{phoneNumber}")
-    public SubscriberDto getBalance(@PathVariable String phoneNumber) {
-        Optional<Subscriber> byPhoneNumber = subscriberService.getSubscriber(phoneNumber);
-        return byPhoneNumber.map(subscriber -> SubscriberDto.builder()
-                .phoneNumber(subscriber.getPhoneNumber())
-                .balance(subscriber.getBalance())
-                .build()).orElse(null);
-    }
+	@Transactional
+	@GetMapping("/report/{phoneNumber}")
+	public ReportResponse getReport(@PathVariable String phoneNumber) {
+		Optional<Subscriber> subscriber = subscriberService.getSubscriber(phoneNumber);
+		if (subscriber.isPresent()) {
+			Double fixPrice = subscriber.get().getTariff().getFixPrice();
+			if (fixPrice == null) {
+				fixPrice = 0.0;
+			}
 
-    @Transactional
-    @GetMapping("/report/{phoneNumber}")
-    public ReportResponse getReport(@PathVariable String phoneNumber) {
-        Optional<Subscriber> subscriber = subscriberService.getSubscriber(phoneNumber);
+			List<BillingReport> billingReports = billingReportService.getAllBillingReportBy(phoneNumber);
+			double totalCost = fixPrice + billingReports.stream()
+				.map(BillingReport::getCost)
+				.mapToDouble(Double::doubleValue)
+				.sum();
 
-        if (subscriber.isPresent()) {
-            Double fixPrice = subscriber.get().getTariff().getFixPrice();
-            if (fixPrice == null) {
-                fixPrice = 0.0;
-            }
-
-            List<BillingReport> billingReport = billingReportService.getPayload(phoneNumber);
-            List<BillingReportDto> billingReportDtos = billingReport.stream()
-                    .map(v -> BillingReportDto.builder()
-                            .callType(v.getCallType())
-                            .startTime(v.getCallStart())
-                            .endTime(v.getCallEnd())
-                            .duration(v.getDuration())
-                            .cost(v.getCost())
-                            .build())
-                    .toList();
-            return ReportResponse.builder()
-                    .id(subscriber.get().getId())
-                    .phoneNumber(subscriber.get().getPhoneNumber())
-                    .tariffUuid(subscriber.get().getTariff().getUuid())
-                    .operator(subscriber.get().getOperator().getName())
-                    .payload(billingReportDtos)
-                    .totalCost(fixPrice + billingReport.stream()
-                            .map(BillingReport::getCost)
-                            .mapToDouble(Double::doubleValue)
-                            .sum())
-                    .monetaryUnit(subscriber.get().getTariff().getMonetaryUnit())
-                    .build();
-        }
-        return null;
-    }
+			return subscriberMapper.subscriberBillingToReportResponse(subscriber.get(), billingReports, totalCost);
+		}
+		return null;
+	}
 }

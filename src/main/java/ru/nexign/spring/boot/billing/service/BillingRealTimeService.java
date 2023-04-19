@@ -11,9 +11,9 @@ import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.io.File.separator;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class BillingRealTimeService {
 		log.info("Авторизация и выгрузка данных абонентов 'Ромашка' " +
 			"с балансом больше нуля в файл crd+.txt");
 		Map<String, String> correctPhoneNumberAndTariff = subscriberRepository.findAllByBalanceAndOperator().stream()
-			.collect(Collectors.toMap(Subscriber::getPhoneNumber, e -> e.getTariff().getUuid()));
+			.collect(toMap(Subscriber::getPhoneNumber, e -> e.getTariff().getUuid()));
 		List<CallDataRecord> dataRecordsWithTariff = callDataRecordReader.read(CDR_FILE, correctPhoneNumberAndTariff);
 		int validRecords = callDataRecordWriter.write(dataRecordsWithTariff, CDR_FILE_PLUS);
 		log.info("Выгружено {} звонков в файл crd+.txt", validRecords);
