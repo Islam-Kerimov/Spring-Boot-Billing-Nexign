@@ -28,11 +28,13 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class CallDataRecordReader {
 	private static final DateTimeFormatter INPUT_FORMATTER = ofPattern("yyyyMMddHHmmss");
 	private static final DateTimeFormatter OUTPUT_FORMATTER = ofPattern("yyyy-MM-dd HH:mm:ss");
-	private final CallDataRecordRepository repository;
+	private final CallDataRecordRepository callDataRecordRepository;
 	private final CallDataRecordMapper callDataRecordMapper;
 
 	public List<CallDataRecord> read() {
-		return repository.findAll();
+		List<CallDataRecord> callDataRecords = callDataRecordRepository.findAll();
+		callDataRecordRepository.deleteAll();
+		return callDataRecords;
 	}
 
 	public List<CallDataRecord> read(String cdrFile, Map<String, String> correctPhoneNumberAndTariff) {

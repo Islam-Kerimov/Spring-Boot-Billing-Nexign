@@ -15,6 +15,8 @@ import java.io.Serializable;
 public class CallDataRecord implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private Integer id;
     @Column
     private String callType;

@@ -18,5 +18,8 @@ spring:
             non_contextual_creation: true
           batch_size: 50
         order_updates: true
+
+server:
+  port: 8097
 #  flyway:
 #    baseline-on-migrate: true

@@ -12,10 +12,7 @@ import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.model.entity.Tariff;
 import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
 import ru.nexign.spring.boot.billing.model.mapper.TariffMapper;
-import ru.nexign.spring.boot.billing.service.BillingRealTimeService;
-import ru.nexign.spring.boot.billing.service.HighPerformanceRatingServerService;
-import ru.nexign.spring.boot.billing.service.SubscriberService;
-import ru.nexign.spring.boot.billing.service.TariffService;
+import ru.nexign.spring.boot.billing.service.*;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +30,7 @@ public class ManagerController {
 	private final TariffService tariffService;
 	private final SubscriberMapper subscriberMapper;
 	private final TariffMapper tariffMapper;
+	private final GeneratorCallDataService generator;
 
 
 	@Transactional
@@ -59,13 +57,15 @@ public class ManagerController {
 	@PatchMapping("/billing")
 	public BillingResponse getAllCurrencies(@RequestBody BillingRequest request) {
 		if (request.getAction().equals("run")) {
+			// генерация новых данных
+			generator.generate();
+
 			// тарификация
 			String cdrPlusFile = billingRealTimeService.billing();
 			Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost(cdrPlusFile);
 			billingRealTimeService.updateBalance(totalCost);
 
 			// создание респонса
-//			return getAllSubscribers();
 			Set<Subscriber> subscribers = subscriberService.getAllBillingSubscribers(totalCost.keySet());
 			return BillingResponse.builder()
 				.numbers(subscriberMapper.subscriberListToSubscriberDtoList(subscribers.stream().toList()))
