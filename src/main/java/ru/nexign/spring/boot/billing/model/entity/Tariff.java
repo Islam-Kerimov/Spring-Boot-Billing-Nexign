@@ -22,9 +22,12 @@ public class Tariff implements Serializable {
     protected String uuid;
     protected String name;
     protected Integer fixMin;
+    @Column(columnDefinition = "NUMERIC")
     protected Double fixPrice;
     protected Integer firstMin;
+    @Column(columnDefinition = "NUMERIC")
     protected Double firstPrice;
+    @Column(columnDefinition = "NUMERIC")
     protected Double minutePrice;
     protected Boolean incomingInside;
     protected Boolean outgoingInside;

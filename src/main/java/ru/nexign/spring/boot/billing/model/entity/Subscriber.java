@@ -22,6 +22,7 @@ public class Subscriber implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tariff_id")
     private Tariff tariff;
+    @Column(columnDefinition = "NUMERIC")
     private Double balance;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "operator_id")

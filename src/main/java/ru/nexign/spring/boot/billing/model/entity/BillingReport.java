@@ -28,5 +28,6 @@ public class BillingReport implements Serializable {
     private LocalTime duration;
     @Transient
     private TariffType tariffType;
+    @Column(columnDefinition = "NUMERIC")
     private Double cost;
 }
