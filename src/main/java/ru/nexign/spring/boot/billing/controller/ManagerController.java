@@ -1,11 +1,11 @@
 package ru.nexign.spring.boot.billing.controller;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.nexign.spring.boot.billing.model.dto.*;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.lang.String.format;
 
 @RestController
 @RequestMapping(value = "/manager")
@@ -40,7 +42,8 @@ public class ManagerController {
             @Validated({Marker.OnUpdate.class})
             @RequestBody SubscriberDto request) {
         Optional<Subscriber> subscriber = subscriberService.updateTariff(subscriberMapper.subscriberDtoToSubscriber(request));
-        return subscriber.map(subscriberMapper::subscriberToSubscriberDto).orElse(null);
+        return subscriber.map(subscriberMapper::subscriberToSubscriberDto)
+                .orElseThrow(() -> new EntityNotFoundException(format("entity with phone number %s not found", request.getPhoneNumber())));
     }
 
     @Transactional
@@ -49,23 +52,26 @@ public class ManagerController {
             @Validated({Marker.OnCreate.class})
             @RequestBody SubscriberDto request) {
         Optional<Subscriber> subscriber = subscriberService.createSubscriber(subscriberMapper.subscriberDtoToSubscriber(request));
-        return subscriber.map(subscriberMapper::subscriberToSubscriberDto).orElse(null);
+        return subscriber.map(subscriberMapper::subscriberToSubscriberDto)
+                .orElseThrow(() -> new EntityExistsException(format("entity with phone number %s exist", request.getPhoneNumber())));
     }
 
     @PostMapping("/tariff")
     public TariffDto createTariff(
             @Validated({Marker.OnCreate.class})
             @RequestBody TariffDto request) {
-        Optional<Tariff> tariff = Optional.ofNullable(tariffService.createTariff(tariffMapper.tariffDtoToTariff(request)));
-        return tariff.map(tariffMapper::tariffToTariffDto).orElse(null);
+        Optional<Tariff> tariff = tariffService.createTariff(tariffMapper.tariffDtoToTariff(request));
+        return tariff.map(tariffMapper::tariffToTariffDto)
+                .orElseThrow(() -> new EntityExistsException(format("tariff with uuid %s or name %s exist", request.getUuid(), request.getName())));
     }
 
     @Transactional
     @PatchMapping("/billing")
     public BillingResponse getAllCurrencies(@Validated @RequestBody BillingRequest request) {
         if (!request.getAction().equalsIgnoreCase("run")) {
-//            throw new Exteption()
+            throw new RuntimeException("action must be 'run'");
         }
+
         // генерация новых данных
         generator.generate();
 

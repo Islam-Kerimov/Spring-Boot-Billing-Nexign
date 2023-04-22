@@ -1,12 +1,14 @@
 package ru.nexign.spring.boot.billing.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.nexign.spring.boot.billing.model.dto.Marker;
 import ru.nexign.spring.boot.billing.model.dto.PaymentDto;
 import ru.nexign.spring.boot.billing.model.dto.ReportResponse;
@@ -19,6 +21,8 @@ import ru.nexign.spring.boot.billing.service.SubscriberService;
 
 import java.util.List;
 import java.util.Optional;
+
+import static java.lang.String.format;
 
 @RestController
 @RequestMapping(value = "/abonent")
@@ -35,7 +39,8 @@ public class SubscriberController {
             @Validated({Marker.OnUpdate.class})
             @RequestBody PaymentDto request) {
         Optional<Subscriber> subscriber = subscriberService.updateBalance(subscriberMapper.paymentDtoToSubscriber(request));
-        return subscriber.map(subscriberMapper::subscriberToPaymentDto).orElse(null);
+        return subscriber.map(subscriberMapper::subscriberToPaymentDto)
+                .orElseThrow(() -> new EntityNotFoundException(format("entity with phone number %s not found", request.getPhoneNumber())));
     }
 
     @Transactional
@@ -44,7 +49,8 @@ public class SubscriberController {
             @Pattern(regexp = "^7\\d{10}$", message = "enter a valid phone number")
             @PathVariable String phoneNumber) {
         Optional<Subscriber> byPhoneNumber = subscriberService.getSubscriber(phoneNumber);
-        return byPhoneNumber.map(subscriberMapper::subscriberToSubscriberDto).orElse(null);
+        return byPhoneNumber.map(subscriberMapper::subscriberToSubscriberDto)
+                .orElseThrow(() -> new EntityNotFoundException(format("entity with phone number %s not found", phoneNumber)));
     }
 
     @Transactional
@@ -53,20 +59,21 @@ public class SubscriberController {
             @Pattern(regexp = "^7\\d{10}$", message = "enter a valid phone number")
             @PathVariable String phoneNumber) {
         Optional<Subscriber> subscriber = subscriberService.getSubscriber(phoneNumber);
-        if (subscriber.isPresent()) {
-            Double fixPrice = subscriber.get().getTariff().getFixPrice();
-            if (fixPrice == null) {
-                fixPrice = 0.0;
-            }
-
-            List<BillingReport> billingReports = billingReportService.getAllBillingReportBy(phoneNumber);
-            double totalCost = fixPrice + billingReports.stream()
-                    .map(BillingReport::getCost)
-                    .mapToDouble(Double::doubleValue)
-                    .sum();
-
-            return subscriberMapper.subscriberBillingToReportResponse(subscriber.get(), billingReports, totalCost);
+        if (subscriber.isEmpty()) {
+            throw new EntityNotFoundException(format("entity with phone number %s not found", phoneNumber));
         }
-        return null;
+
+        Double fixPrice = subscriber.get().getTariff().getFixPrice();
+        if (fixPrice == null) {
+            fixPrice = 0.0;
+        }
+
+        List<BillingReport> billingReports = billingReportService.getAllBillingReportBy(phoneNumber);
+        double totalCost = fixPrice + billingReports.stream()
+                .map(BillingReport::getCost)
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        return subscriberMapper.subscriberBillingToReportResponse(subscriber.get(), billingReports, totalCost);
     }
 }

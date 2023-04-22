@@ -12,4 +12,6 @@ public interface TariffRepository extends JpaRepository<Tariff, Integer> {
     Optional<Tariff> findByUuid(String uuid);
 
     Boolean existsByUuid(String uuid);
+
+    Boolean existsByUuidOrName(String uuid, String name);
 }
