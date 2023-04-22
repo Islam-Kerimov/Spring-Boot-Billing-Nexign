@@ -19,6 +19,7 @@ import java.time.LocalTime;
 public class BillingReport implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private Integer id;
     private String phoneNumber;
     private String callType;

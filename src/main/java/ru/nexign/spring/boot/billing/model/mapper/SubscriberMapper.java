@@ -45,8 +45,10 @@ public abstract class SubscriberMapper {
 	@Mapping(target = "totalCost", source = "totalCost")
 	public abstract ReportResponse subscriberBillingToReportResponse(Subscriber subscriber, List<BillingReport> billingReports, Double totalCost);
 
-	public abstract Subscriber payRequestToSubscriber(PayRequest request);
+	@Mapping(target = "balance", source = "money")
+	public abstract Subscriber paymentDtoToSubscriber(PaymentDto paymentDto);
 
-	public abstract PayResponse subscriberToPayResponse(Subscriber subscriber);
+	@Mapping(target = "money", source = "balance")
+	public abstract PaymentDto subscriberToPaymentDto(Subscriber subscriber);
 }
 

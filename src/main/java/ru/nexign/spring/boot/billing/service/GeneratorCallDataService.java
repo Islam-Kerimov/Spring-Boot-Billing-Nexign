@@ -74,7 +74,7 @@ public class GeneratorCallDataService {
 			localTimeEnd.toString().replace(":", "")};
 	}
 
-	public CallDataRecord createCDR(String correctPhoneNumber) {
+	private CallDataRecord createCDR(String correctPhoneNumber) {
 		String randomCallType = createRandomCallType();
 		String randomPhoneNumber;
 		if (new Random().nextInt(10) < 9) {
@@ -92,7 +92,7 @@ public class GeneratorCallDataService {
 			.build();
 	}
 
-	public void iterateMonthReport() {
+	private void iterateMonthReport() {
 		MONTH++;
 		if (MONTH == 13) {
 			MONTH = 1;
@@ -105,7 +105,7 @@ public class GeneratorCallDataService {
 		List<Subscriber> subscribersInDb = subscriberService.getAllSubscribers();
 		List<CallDataRecord> callDataRecordList = new ArrayList<>();
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			CallDataRecord callDataRecord = createCDR(subscribersInDb.get(new Random().nextInt(subscribersInDb.size())).getPhoneNumber());
 			callDataRecordList.add(callDataRecord);
 		}

@@ -33,6 +33,4 @@ build/
 ### VS Code ###
 .vscode/
 
-/data
-cdr.txt
-cdr+.txt
+report/
