@@ -20,7 +20,7 @@ import static java.lang.Math.random;
 public class GeneratorCallDataService {
 	private static final int PHONE_NUMBER_LENGTH = 9;
 	public static int YEAR = 2023;
-	private static int MONTH = 1;
+	public static int MONTH = 0;
 
 	private final SubscriberService subscriberService;
 	private final CallDataRecordRepository callDataRecordRepository;
@@ -101,15 +101,15 @@ public class GeneratorCallDataService {
 	}
 
 	public void generate() {
+		iterateMonthReport();
 		List<Subscriber> subscribersInDb = subscriberService.getAllSubscribers();
 		List<CallDataRecord> callDataRecordList = new ArrayList<>();
 
-		for (int i = 0; i < 5000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			CallDataRecord callDataRecord = createCDR(subscribersInDb.get(new Random().nextInt(subscribersInDb.size())).getPhoneNumber());
 			callDataRecordList.add(callDataRecord);
 		}
 
-		iterateMonthReport();
 		callDataRecordRepository.saveAll(callDataRecordList);
 	}
 }

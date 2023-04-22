@@ -16,6 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class SpringBootBillingNexignApplication implements CommandLineRunner {
+	private static final String REPORT_DIRECTORY = "report";
 
 	private final BillingRealTimeService billingRealTimeService;
 	private final HighPerformanceRatingServerService highPerformanceRatingServerService;
@@ -28,7 +29,7 @@ public class SpringBootBillingNexignApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		// create directory for cdr and cdr+ files
-		boolean directory = (new File("data")).mkdir();
+		boolean directory = (new File(REPORT_DIRECTORY)).mkdir();
 
 		// generate cdr records to dataBase
 		generator.generate();

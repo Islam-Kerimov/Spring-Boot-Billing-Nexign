@@ -13,14 +13,18 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.io.File.separator;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static ru.nexign.spring.boot.billing.service.GeneratorCallDataService.MONTH;
+import static ru.nexign.spring.boot.billing.service.GeneratorCallDataService.YEAR;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class BillingRealTimeService {
-	private static final String CDR_FILE = "data" + separator + "cdr.txt";
-	private static final String CDR_FILE_PLUS = "data" + separator + "cdr+.txt";
+	private static final String DIRECTORY = "report";
+	private static final String CDR_FILE = "cdr_%d_%d.txt";
+	private static final String CDR_FILE_PLUS = "cdr+_%d_%d.txt";
 
 	private final CallDataRecordReader callDataRecordReader;
 	private final CallDataRecordWriter callDataRecordWriter;
@@ -30,18 +34,20 @@ public class BillingRealTimeService {
 	public String billing() {
 		log.info("Выгрузка звонков всех абонентов в файл crd.txt");
 		List<CallDataRecord> dataRecords = callDataRecordReader.read();
-		int records = callDataRecordWriter.write(dataRecords, CDR_FILE);
-		log.info("Выгружено {} звонков в файл crd.txt", records);
+		String cdrFile = DIRECTORY + separator + format(CDR_FILE, YEAR, MONTH);
+		int records = callDataRecordWriter.write(dataRecords, cdrFile);
+		log.info("Выгружено {} звонков в файл {}", records, cdrFile);
 
 
 		log.info("Авторизация и выгрузка данных абонентов 'Ромашка' " +
 			"с балансом больше нуля в файл crd+.txt");
 		Map<String, String> correctPhoneNumberAndTariff = subscriberRepository.findAllByBalanceAndOperator().stream()
 			.collect(toMap(Subscriber::getPhoneNumber, e -> e.getTariff().getUuid()));
-		List<CallDataRecord> dataRecordsWithTariff = callDataRecordReader.read(CDR_FILE, correctPhoneNumberAndTariff);
-		int validRecords = callDataRecordWriter.write(dataRecordsWithTariff, CDR_FILE_PLUS);
-		log.info("Выгружено {} звонков в файл crd+.txt", validRecords);
-		return CDR_FILE_PLUS;
+		List<CallDataRecord> dataRecordsWithTariff = callDataRecordReader.read(cdrFile, correctPhoneNumberAndTariff);
+		String cdrPlusFile = DIRECTORY + separator + format(CDR_FILE_PLUS, YEAR, MONTH);
+		int validRecords = callDataRecordWriter.write(dataRecordsWithTariff, cdrPlusFile);
+		log.info("Выгружено {} звонков в файл {}", validRecords, cdrPlusFile);
+		return cdrPlusFile;
 	}
 
 	@Transactional

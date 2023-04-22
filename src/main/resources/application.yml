@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/nexign
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -19,7 +19,7 @@ spring:
           batch_size: 50
         order_updates: true
 
-server:
-  port: 8097
+#server:
+#  port: 8097
 #  flyway:
 #    baseline-on-migrate: true
