@@ -12,8 +12,8 @@ public abstract class CallDataRecordMapper {
 		if (data != null) {
 			callDataRecord.callType(data[0]);
 			callDataRecord.phoneNumber(data[1]);
-			callDataRecord.callStart(data[2]);
-			callDataRecord.callEnd(data[3]);
+			callDataRecord.startTime(data[2]);
+			callDataRecord.endTime(data[3]);
 			callDataRecord.tariffType(tariffType);
 		}
 

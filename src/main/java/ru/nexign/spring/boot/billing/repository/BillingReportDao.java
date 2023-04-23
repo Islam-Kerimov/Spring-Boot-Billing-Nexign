@@ -15,7 +15,7 @@ public class BillingReportDao {
 
     private static final String SQL_INSERT = "" +
             "INSERT INTO billing_report (phone_number, call_type, call_start, call_end, duration, cost) " +
-            "VALUES (:phoneNumber, :callType, :callStart, :callEnd, :duration, :cost) " +
+            "VALUES (:phoneNumber, :callType, :startTime, :endTime, :duration, :cost) " +
             "ON CONFLICT ON CONSTRAINT unique_report DO NOTHING";
 
     public List<String> saveAll(Set<BillingReport> reports) {
@@ -25,8 +25,8 @@ public class BillingReportDao {
         for (BillingReport report : reports) {
             paramMap.put("phoneNumber", report.getPhoneNumber());
             paramMap.put("callType", report.getCallType());
-            paramMap.put("callStart", report.getCallStart());
-            paramMap.put("callEnd", report.getCallEnd());
+            paramMap.put("startTime", report.getStartTime());
+            paramMap.put("endTime", report.getEndTime());
             paramMap.put("duration", report.getDuration());
             paramMap.put("cost", report.getCost());
             if (jdbcTemplate.update(SQL_INSERT, paramMap) > 0) {

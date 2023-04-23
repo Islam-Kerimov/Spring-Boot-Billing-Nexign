@@ -36,8 +36,8 @@ public abstract class BillingReportMapper {
 		return BillingReport.builder()
 			.callType(data[0])
 			.phoneNumber(data[1])
-			.callStart(start)
-			.callEnd(end)
+			.startTime(start)
+			.endTime(end)
 			.duration(getDurationTime(start, end))
 			.tariffType(TariffType.fromString(data[4]))
 			.build();

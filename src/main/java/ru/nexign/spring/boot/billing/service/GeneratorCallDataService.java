@@ -27,7 +27,7 @@ public class GeneratorCallDataService {
 	private final CallDataRecordRepository callDataRecordRepository;
 
 	private String createRandomCallType() {
-		String[] callTypes = {"01", "02"};
+		String[] callTypes = {"01", "02", "03"};
 		return callTypes[new Random().nextInt(callTypes.length)];
 	}
 
@@ -88,8 +88,8 @@ public class GeneratorCallDataService {
 		return CallDataRecord.builder()
 			.callType(randomCallType)
 			.phoneNumber(randomPhoneNumber)
-			.callStart(time[0])
-			.callEnd(time[1])
+			.startTime(time[0])
+			.endTime(time[1])
 			.build();
 	}
 
@@ -106,7 +106,7 @@ public class GeneratorCallDataService {
 		List<Subscriber> subscribersInDb = subscriberService.getAllSubscribers(Sort.by("id"));
 		List<CallDataRecord> callDataRecordList = new ArrayList<>();
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 5000; i++) {
 			CallDataRecord callDataRecord = createCDR(subscribersInDb.get(new Random().nextInt(subscribersInDb.size())).getPhoneNumber());
 			callDataRecordList.add(callDataRecord);
 		}

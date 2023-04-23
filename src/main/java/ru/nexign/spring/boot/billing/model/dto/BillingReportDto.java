@@ -17,10 +17,8 @@ import java.time.LocalTime;
 @JsonPropertyOrder({"callType", "startTime", "endTime", "duration", "cost"})
 public class BillingReportDto {
 	private String callType;
-	@JsonProperty("startTime")
-	private LocalDateTime callStart;
-	@JsonProperty("endTime")
-	private LocalDateTime callEnd;
+	private LocalDateTime startTime;
+	private LocalDateTime endTime;
 	private LocalTime duration;
 	private Double cost;
 }

@@ -25,3 +25,15 @@ spring:
 jwt:
   secret:
     key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+server:
+  port: 8080
+
+swagger:
+  info:
+    title: Spring Boot Billing Nexign
+    description: https://i.learnhub.ru/content/info/31096/from/28471?vc_cik=10042422-vFe9M-Q8Zsn-fvnHg&vc_lpid=31096
+    contact:
+      name: Kerimov Islam
+      email: kerimovikh@irbis.ru
+    version: 1.0.0

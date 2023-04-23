@@ -1,10 +1,12 @@
 package ru.nexign.spring.boot.billing.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,6 @@ import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.model.entity.Tariff;
 import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
 import ru.nexign.spring.boot.billing.model.mapper.TariffMapper;
-import ru.nexign.spring.boot.billing.repository.OperatorRepository;
 import ru.nexign.spring.boot.billing.service.*;
 
 import java.util.*;
@@ -27,8 +28,9 @@ import static java.lang.String.format;
 @Validated
 @RequiredArgsConstructor
 @Slf4j
+@SecurityRequirement(name = "Bearer Authentication")
+@Tag(name = "Manager", description = "The Manager API. Contains all operations of manager interaction with the system")
 public class ManagerController {
-    private final OperatorRepository operatorRepository;
     private final BillingRealTimeService billingRealTimeService;
     private final HighPerformanceRatingServerService highPerformanceRatingServerService;
     private final SubscriberService subscriberService;
@@ -40,7 +42,12 @@ public class ManagerController {
 
     @Transactional
     @PatchMapping("/changeTariff")
+    @Operation(summary = "Смена тарифа абонента",
+            description = "Менеджер меняет тариф абонента")
     public SubscriberDto updateTariff(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "В теле запроса обязательно должен быть номер абонента и тариф, на который менеджер планирует изменить у абонента",
+                    required = true)
             @Validated({Marker.OnUpdate.class})
             @RequestBody SubscriberDto request) {
         Optional<Subscriber> subscriber = subscriberService.updateTariff(subscriberMapper.subscriberDtoToSubscriber(request));
@@ -51,7 +58,12 @@ public class ManagerController {
     @Transactional
     @PostMapping("/abonent")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Создание нового абонента",
+            description = "Менеджер создает нового абонента в БД")
     public SubscriberDto createSubscriber(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "В теле запроса обязательно должен быть номер абонента, тариф, сумма начального баланса и оператор абонента",
+                    required = true)
             @Validated({Marker.OnCreate.class})
             @RequestBody SubscriberDto request) {
         Optional<Subscriber> subscriber = subscriberService.createSubscriber(subscriberMapper.subscriberDtoToSubscriber(request));
@@ -61,7 +73,12 @@ public class ManagerController {
 
     @PostMapping("/tariff")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Создание нового тарифа",
+            description = "Менеджер создает новый тариф в БД")
     public TariffDto createTariff(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "В теле запроса обязательно должен быть двухзначный уникальный идентификатор, имя и оператор создаваемого тарифа",
+                    required = true)
             @Validated({Marker.OnCreate.class})
             @RequestBody TariffDto request) {
         Optional<Tariff> tariff = tariffService.createTariff(tariffMapper.tariffDtoToTariff(request));
@@ -71,7 +88,12 @@ public class ManagerController {
 
     @Transactional
     @PatchMapping("/billing")
+    @Operation(summary = "Процесс биллинга звонков",
+            description = "Менеджер запускает биллинг звонков всех авторизованных абонентов оператора Ромашка с балансом больше нуля")
     public BillingResponse getAllCurrencies(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "В теле запроса обязательно должно быть поле для запуска биллинга, а именно 'action -> run'",
+                    required = true)
             @Validated @RequestBody BillingRequest request,
             @RequestParam(defaultValue = "id,asc") String[] sort) {
         if (!request.getAction().equalsIgnoreCase("run")) {
@@ -96,6 +118,8 @@ public class ManagerController {
 
     @Transactional
     @GetMapping("/abonents")
+    @Operation(summary = "Получение всех абонентов",
+            description = "Отображение всех абонентов в БД")
     public BillingResponse getAllSubscribers(@RequestParam(defaultValue = "id,asc") String[] sort) {
         List<Sort.Order> orders = getOrders(sort);
         List<Subscriber> subscribers = subscriberService.getAllSubscribers(Sort.by(orders));

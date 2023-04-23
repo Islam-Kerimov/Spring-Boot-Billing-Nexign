@@ -1,5 +1,7 @@
 package ru.nexign.spring.boot.billing.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -20,18 +22,23 @@ import java.util.Optional;
 @RequestMapping("/api/v1/users")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "User", description = "The User API. Contains all the operations that can be performed on a user.")
 public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
 
     @GetMapping
+    @Operation(summary = "Получение всех пользователей в БД",
+            description = "Отображение всех авторизованных пользователей в БД")
     public List<UserDto> getAllUsers() {
         List<User> users = userService.getAll();
         return userMapper.entityUserListToDtoList(users);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Получение пользователя по id",
+            description = "Отображение информации о пользователе")
     public UserDto getUserById(@PathVariable @Min(1) Integer id) {
         Optional<User> user = userService.findById(id);
         return userMapper.entityUserToDto(user

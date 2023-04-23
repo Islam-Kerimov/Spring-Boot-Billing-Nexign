@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: Название тестового задания
+  description: Описание тестового задания
+  contact:
+    email: info@localhost
+  version: 1.0.0
+
+servers:
+  - url: http://localhost/api/v1
+tags:
+  - name: abonent
+    description:
+  - name: manager
+    description: В этом разделе находятся методы взаимодействия менеджера с системой
+paths:
+  /abonent/pay:
+    patch:
+      tags:
+        - abonent
+      summary: Пополнение баланса абонентом
+      description: Абонент пополняет свой счет
+      operationId: abonentPay
+      requestBody:
+        description: В теле запроса обязательно должен быть номер абонента и сумма, на которую абонент планирует пополнить баланс
+        content:
+          application/json:
+            schema:
+              required:
+                - phoneNumber
+                - money
+              type: object
+              properties:
+                phoneNumber:
+                  type: integer
+                  example: 79001112233
+                money:
+                  type: integer
+                  format: int64
+                  example: 400
+        required: true
+      responses:
+        '200':
+          description: Успешное пополнение баланса
+          content:
+            application/json:
+              schema:
+                required:
+                  - id
+                  - phoneNumber
+                  - balance
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 10
+                  phoneNumber:
+                    type: integer
+                    format: int64
+                    example: 79001112233
+                  balance:
+                    type: integer
+                    format: int64
+                    example: 800
+
+  /manager/abonent:
+    post:
+      tags:
+        - manager
+      summary: Менеджер создаёт нового абонента
+      description: Менеджер создаёт нового абонента
+      operationId: managerAbonent
+      requestBody:
+        description: В теле запроса обязательно должен быть номер абонента и сумма, на которую абонент планирует пополнить баланс
+        content:
+          application/json:
+            schema:
+              required:
+                - phoneNumber
+                - tarrif
+              type: object
+              properties:
+                phoneNumber:
+                  type: integer
+                  example: 79001112233
+                tarrif:
+                  type: string
+                  example: "03"
+                balance:
+                  type: integer
+                  example: 300
+        required: true
+      responses:
+        '200':
+          description: Успешное создание абонента
+          content:
+            application/json:
+              schema:
+                required:
+                  - id
+                  - phoneNumber
+                  - tarrif
+                  - balance
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 10
+                  phoneNumber:
+                    type: integer
+                    format: int64
+                    example: 79001112233
+                  tarrif:
+                    type: string
+                    example: "03"
+                  balance:
+                    type: integer
+                    format: int64
+                    example: 300
+
+
+      

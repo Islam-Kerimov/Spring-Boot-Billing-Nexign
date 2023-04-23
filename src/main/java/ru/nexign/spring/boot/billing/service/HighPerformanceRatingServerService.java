@@ -82,7 +82,7 @@ public class HighPerformanceRatingServerService {
 			if (reports.containsKey(data[1])) {
 				infos = reports.get(data[1]);
 			} else {
-				infos = new TreeSet<>(comparing(BillingReport::getCallStart));
+				infos = new TreeSet<>(comparing(BillingReport::getStartTime));
 			}
 			infos.add(billingReport);
 			reports.put(data[1], infos);

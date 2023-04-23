@@ -1,5 +1,7 @@
 package ru.nexign.spring.boot.billing.model.entity;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.nexign.spring.boot.billing.model.domain.TariffType;
@@ -23,8 +25,10 @@ public class BillingReport implements Serializable {
     private Integer id;
     private String phoneNumber;
     private String callType;
-    private LocalDateTime callStart;
-    private LocalDateTime callEnd;
+    @Column(name = "call_start")
+    private LocalDateTime startTime;
+    @Column(name = "call_end")
+    private LocalDateTime endTime;
     private LocalTime duration;
     @Transient
     private TariffType tariffType;

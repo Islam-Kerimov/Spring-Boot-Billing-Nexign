@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,19 +23,19 @@ public class CallDataRecord implements Serializable {
     private String callType;
     @Column
     private String phoneNumber;
-    @Column
-    private String callStart;
-    @Column
-    private String callEnd;
+    @Column(name = "call_start")
+    private String startTime;
+    @Column(name = "call_end")
+    private String endTime;
     @Transient
     private String tariffType;
 
     @Override
     public String toString() {
         if (tariffType == null) {
-            return callType + "," + phoneNumber + "," + callStart + "," + callEnd + "\n";
+            return callType + "," + phoneNumber + "," + startTime + "," + endTime + "\n";
         } else {
-            return callType + "," + phoneNumber + "," + callStart + "," + callEnd + "," + tariffType + "\n";
+            return callType + "," + phoneNumber + "," + startTime + "," + endTime + "," + tariffType + "\n";
         }
     }
 }
