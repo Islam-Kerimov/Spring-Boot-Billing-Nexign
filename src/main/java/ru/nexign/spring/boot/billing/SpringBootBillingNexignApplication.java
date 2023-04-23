@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import ru.nexign.spring.boot.billing.service.BillingRealTimeService;
 import ru.nexign.spring.boot.billing.service.GeneratorCallDataService;
 import ru.nexign.spring.boot.billing.service.HighPerformanceRatingServerService;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.util.Map;
 
 @SpringBootApplication
+@EnableCaching
 @RequiredArgsConstructor
 @Slf4j
 public class SpringBootBillingNexignApplication implements CommandLineRunner {

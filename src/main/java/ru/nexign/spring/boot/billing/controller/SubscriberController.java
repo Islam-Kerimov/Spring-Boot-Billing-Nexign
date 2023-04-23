@@ -4,11 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.nexign.spring.boot.billing.model.dto.Marker;
 import ru.nexign.spring.boot.billing.model.dto.PaymentDto;
 import ru.nexign.spring.boot.billing.model.dto.ReportResponse;
@@ -25,7 +23,7 @@ import java.util.Optional;
 import static java.lang.String.format;
 
 @RestController
-@RequestMapping(value = "/abonent")
+@RequestMapping(value = "/api/v1/abonent")
 @Validated
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +33,7 @@ public class SubscriberController {
     private final SubscriberMapper subscriberMapper;
 
     @PatchMapping("/pay")
-    public PaymentDto getAllCurrencies(
+    public PaymentDto updateBalance(
             @Validated({Marker.OnUpdate.class})
             @RequestBody PaymentDto request) {
         Optional<Subscriber> subscriber = subscriberService.updateBalance(subscriberMapper.paymentDtoToSubscriber(request));

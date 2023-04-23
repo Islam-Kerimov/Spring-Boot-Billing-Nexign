@@ -22,7 +22,7 @@ import java.util.Set;
 import static java.lang.String.format;
 
 @RestController
-@RequestMapping(value = "/manager")
+@RequestMapping(value = "/api/v1/manager")
 @Validated
 @RequiredArgsConstructor
 @Slf4j
