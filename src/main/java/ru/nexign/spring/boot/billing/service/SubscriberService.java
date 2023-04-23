@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
@@ -29,8 +31,8 @@ public class SubscriberService {
     private final TariffRepository tariffRepository;
     private final OperatorRepository operatorRepository;
 
-    public List<Subscriber> getAllSubscribers() {
-        return subscriberRepository.findAll();
+    public List<Subscriber> getAllSubscribers(Sort sort) {
+        return subscriberRepository.findAll(sort);
     }
 
     public Optional<Subscriber> updateTariff(Subscriber subscriber) {
@@ -84,7 +86,7 @@ public class SubscriberService {
         return subscriberRepository.findByPhoneNumber(phoneNumber);
     }
 
-    public Set<Subscriber> getAllBillingSubscribers(Set<String> phoneNumbers) {
-        return subscriberRepository.findAllByPhoneNumberIn(phoneNumbers);
+    public Set<Subscriber> getAllBillingSubscribers(Set<String> phoneNumbers, Sort sort) {
+        return subscriberRepository.findAllByPhoneNumberIn(phoneNumbers, sort);
     }
 }

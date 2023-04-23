@@ -2,6 +2,7 @@ package ru.nexign.spring.boot.billing.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.nexign.spring.boot.billing.model.entity.BillingReport;
 import ru.nexign.spring.boot.billing.repository.BillingReportRepository;
@@ -15,7 +16,7 @@ public class BillingReportService {
 
     private final BillingReportRepository billingReportRepository;
 
-    public List<BillingReport> getAllBillingReportBy(String phoneNumber) {
-        return billingReportRepository.findAllByPhoneNumber(phoneNumber);
+    public List<BillingReport> getAllBillingReportBy(String phoneNumber, Sort sort) {
+        return billingReportRepository.findAllByPhoneNumber(phoneNumber, sort);
     }
 }

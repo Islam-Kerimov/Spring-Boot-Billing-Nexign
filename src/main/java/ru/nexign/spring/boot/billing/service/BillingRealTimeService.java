@@ -2,6 +2,7 @@ package ru.nexign.spring.boot.billing.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
@@ -52,7 +53,7 @@ public class BillingRealTimeService {
 
 	@Transactional
 	public void updateBalance(Map<String, Double> totalCost) {
-		Set<Subscriber> subscribersUpdate = subscriberRepository.findAllByPhoneNumberIn(totalCost.keySet());
+		Set<Subscriber> subscribersUpdate = subscriberRepository.findAllByPhoneNumberIn(totalCost.keySet(), Sort.by("id"));
 		subscribersUpdate.forEach(s -> {
 			Double fixPrice = s.getTariff().getFixPrice();
 			if (fixPrice != null && fixPrice > 0) {

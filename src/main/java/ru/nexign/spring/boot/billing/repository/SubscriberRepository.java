@@ -1,5 +1,6 @@
 package ru.nexign.spring.boot.billing.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +19,7 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 		nativeQuery = true)
 	Set<Subscriber> findAllByBalanceAndOperator();
 
-	Set<Subscriber> findAllByPhoneNumberIn(Set<String> phoneNumbers);
+	Set<Subscriber> findAllByPhoneNumberIn(Set<String> phoneNumbers, Sort sort);
 
 	Optional<Subscriber> findByPhoneNumber(String phoneNumber);
 

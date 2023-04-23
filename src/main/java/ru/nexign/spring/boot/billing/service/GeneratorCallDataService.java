@@ -1,6 +1,7 @@
 package ru.nexign.spring.boot.billing.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
@@ -102,7 +103,7 @@ public class GeneratorCallDataService {
 
 	public void generate() {
 		iterateMonthReport();
-		List<Subscriber> subscribersInDb = subscriberService.getAllSubscribers();
+		List<Subscriber> subscribersInDb = subscriberService.getAllSubscribers(Sort.by("id"));
 		List<CallDataRecord> callDataRecordList = new ArrayList<>();
 
 		for (int i = 0; i < 100; i++) {

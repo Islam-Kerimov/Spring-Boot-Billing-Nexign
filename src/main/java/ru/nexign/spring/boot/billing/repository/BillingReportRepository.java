@@ -1,5 +1,6 @@
 package ru.nexign.spring.boot.billing.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,5 +13,5 @@ import java.util.Map;
 import java.util.Set;
 
 public interface BillingReportRepository extends JpaRepository<BillingReport, Integer> {
-    List<BillingReport> findAllByPhoneNumber(String phoneNumber);
+    List<BillingReport> findAllByPhoneNumber(String phoneNumber, Sort sort);
 }

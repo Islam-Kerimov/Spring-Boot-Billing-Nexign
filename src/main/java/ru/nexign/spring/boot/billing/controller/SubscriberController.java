@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
 import ru.nexign.spring.boot.billing.service.BillingReportService;
 import ru.nexign.spring.boot.billing.service.SubscriberService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +57,8 @@ public class SubscriberController {
     @GetMapping("/report/{phoneNumber}")
     public ReportResponse getReport(
             @Pattern(regexp = "^7\\d{10}$", message = "enter a valid phone number")
-            @PathVariable String phoneNumber) {
+            @PathVariable String phoneNumber,
+            @RequestParam(defaultValue = "id,asc") String[] sort) {
         Optional<Subscriber> subscriber = subscriberService.getSubscriber(phoneNumber);
         if (subscriber.isEmpty()) {
             throw new EntityNotFoundException(format("entity with phone number %s not found", phoneNumber));
@@ -66,12 +69,45 @@ public class SubscriberController {
             fixPrice = 0.0;
         }
 
-        List<BillingReport> billingReports = billingReportService.getAllBillingReportBy(phoneNumber);
+        List<Sort.Order> orders = getOrders(sort);
+        List<BillingReport> billingReports = billingReportService.getAllBillingReportBy(phoneNumber, Sort.by(orders));
         double totalCost = fixPrice + billingReports.stream()
                 .map(BillingReport::getCost)
                 .mapToDouble(Double::doubleValue)
                 .sum();
 
         return subscriberMapper.subscriberBillingToReportResponse(subscriber.get(), billingReports, totalCost);
+    }
+
+    private List<Sort.Order> getOrders(String[] sort) {
+        List<Sort.Order> orders = new ArrayList<>();
+        if (sort[0].contains(",")) {
+            for (String sortOrder : sort) {
+                String[] sortValue = sortOrder.split(",");
+                orders.add(new Sort.Order(
+                        sortValue.length == 2
+                                ? getSortDirection(sortValue[1])
+                                : Sort.Direction.ASC,
+                        sortValue[0]));
+            }
+        } else {
+            orders.add(new Sort.Order(
+                    sort.length == 2
+                            ? getSortDirection(sort[1])
+                            : Sort.Direction.ASC,
+                    sort[0]));
+        }
+
+        return orders;
+    }
+
+    private Sort.Direction getSortDirection(String direction) {
+        if (direction.equalsIgnoreCase("asc")) {
+            return Sort.Direction.ASC;
+        } else if (direction.equalsIgnoreCase("desc")) {
+            return Sort.Direction.DESC;
+        }
+
+        return Sort.Direction.ASC;
     }
 }
