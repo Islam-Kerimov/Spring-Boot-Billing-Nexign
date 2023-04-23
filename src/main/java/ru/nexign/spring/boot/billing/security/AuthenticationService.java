@@ -1,4 +1,4 @@
-package ru.nexign.spring.boot.billing.service;
+package ru.nexign.spring.boot.billing.security;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

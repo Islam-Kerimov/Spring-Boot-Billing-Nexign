@@ -1,4 +1,4 @@
-package ru.nexign.spring.boot.billing.service;
+package ru.nexign.spring.boot.billing.service.cdr;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.repository.CallDataRecordRepository;
+import ru.nexign.spring.boot.billing.service.crm.SubscriberService;
 
 import java.time.LocalTime;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package ru.nexign.spring.boot.billing.service;
+package ru.nexign.spring.boot.billing.service.hrs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -6,9 +6,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import ru.nexign.spring.boot.billing.service.BillingRealTimeService;
-import ru.nexign.spring.boot.billing.service.GeneratorCallDataService;
-import ru.nexign.spring.boot.billing.service.HighPerformanceRatingServerService;
+import ru.nexign.spring.boot.billing.service.brt.BillingRealTimeService;
+import ru.nexign.spring.boot.billing.service.cdr.GeneratorCallDataService;
+import ru.nexign.spring.boot.billing.service.hrs.HighPerformanceRatingServerService;
 
 import java.io.File;
 import java.util.Map;

@@ -1,7 +1,6 @@
 package ru.nexign.spring.boot.billing.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,8 +18,8 @@ import ru.nexign.spring.boot.billing.model.dto.SubscriberDto;
 import ru.nexign.spring.boot.billing.model.entity.BillingReport;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
-import ru.nexign.spring.boot.billing.service.BillingReportService;
-import ru.nexign.spring.boot.billing.service.SubscriberService;
+import ru.nexign.spring.boot.billing.service.crm.BillingReportService;
+import ru.nexign.spring.boot.billing.service.crm.SubscriberService;
 
 import java.util.ArrayList;
 import java.util.List;

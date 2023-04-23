@@ -1,4 +1,4 @@
-package ru.nexign.spring.boot.billing.service;
+package ru.nexign.spring.boot.billing.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

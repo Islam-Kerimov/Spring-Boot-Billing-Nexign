@@ -1,4 +1,4 @@
-package ru.nexign.spring.boot.billing.service;
+package ru.nexign.spring.boot.billing.service.brt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.repository.SubscriberRepository;
+import ru.nexign.spring.boot.billing.service.cdr.CallDataRecordReader;
+import ru.nexign.spring.boot.billing.service.cdr.CallDataRecordWriter;
 
 import java.util.List;
 import java.util.Map;
@@ -16,8 +18,8 @@ import java.util.Set;
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
-import static ru.nexign.spring.boot.billing.service.GeneratorCallDataService.MONTH;
-import static ru.nexign.spring.boot.billing.service.GeneratorCallDataService.YEAR;
+import static ru.nexign.spring.boot.billing.service.cdr.GeneratorCallDataService.MONTH;
+import static ru.nexign.spring.boot.billing.service.cdr.GeneratorCallDataService.YEAR;
 
 @Service
 @RequiredArgsConstructor

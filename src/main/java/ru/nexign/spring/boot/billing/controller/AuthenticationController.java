@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.nexign.spring.boot.billing.model.dto.AuthenticationRequest;
 import ru.nexign.spring.boot.billing.model.dto.AuthenticationResponse;
 import ru.nexign.spring.boot.billing.model.dto.RegisterRequest;
-import ru.nexign.spring.boot.billing.service.AuthenticationService;
+import ru.nexign.spring.boot.billing.security.AuthenticationService;
 
 import static org.springframework.http.ResponseEntity.ok;
 

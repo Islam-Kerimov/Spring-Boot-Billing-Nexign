@@ -17,7 +17,11 @@ import ru.nexign.spring.boot.billing.model.entity.Subscriber;
 import ru.nexign.spring.boot.billing.model.entity.Tariff;
 import ru.nexign.spring.boot.billing.model.mapper.SubscriberMapper;
 import ru.nexign.spring.boot.billing.model.mapper.TariffMapper;
-import ru.nexign.spring.boot.billing.service.*;
+import ru.nexign.spring.boot.billing.service.brt.BillingRealTimeService;
+import ru.nexign.spring.boot.billing.service.cdr.GeneratorCallDataService;
+import ru.nexign.spring.boot.billing.service.crm.SubscriberService;
+import ru.nexign.spring.boot.billing.service.crm.TariffService;
+import ru.nexign.spring.boot.billing.service.hrs.HighPerformanceRatingServerService;
 
 import java.util.*;
 

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.nexign.spring.boot.billing.model.dto.UserDto;
 import ru.nexign.spring.boot.billing.model.entity.User;
 import ru.nexign.spring.boot.billing.model.mapper.UserMapper;
-import ru.nexign.spring.boot.billing.service.UserService;
+import ru.nexign.spring.boot.billing.security.UserService;
 
 import java.util.List;
 import java.util.Optional;
