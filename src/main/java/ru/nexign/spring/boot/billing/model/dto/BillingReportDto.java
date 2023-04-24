@@ -1,6 +1,5 @@
 package ru.nexign.spring.boot.billing.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +15,14 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @JsonPropertyOrder({"callType", "startTime", "endTime", "duration", "cost"})
 public class BillingReportDto {
+
 	private String callType;
+
 	private LocalDateTime startTime;
+
 	private LocalDateTime endTime;
+
 	private LocalTime duration;
+
 	private Double cost;
 }

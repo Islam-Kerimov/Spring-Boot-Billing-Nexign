@@ -10,6 +10,12 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface SubscriberRepository extends JpaRepository<Subscriber, Integer> {
+
+	/**
+	 * Получение всех абонентов Ромашка с балансом больше нуля.
+	 *
+	 * @return список абонентов
+	 */
 	@Modifying
 	@Query(value = "" +
 		"SELECT s.*" +

@@ -9,7 +9,10 @@ import ru.nexign.spring.boot.billing.model.entity.Role;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    private Integer id;
-    private String username;
-    private Role role;
+
+	private Integer id;
+
+	private String username;
+
+	private Role role;
 }

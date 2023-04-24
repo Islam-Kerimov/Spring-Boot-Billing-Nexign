@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BillingRequest {
-    @NotBlank(message = "action must be 'run'")
-    private String action;
+
+	@NotBlank(message = "action must be 'run'")
+	private String action;
 }

@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class ExceptionResponse {
-    @JsonProperty("error_status")
-    private final String errorStatus;
-    private final String message;
+
+	@JsonProperty("error_status")
+	private final String errorStatus;
+
+	private final String message;
 }

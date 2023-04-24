@@ -3,6 +3,9 @@ package ru.nexign.spring.boot.billing.model.mapper;
 import org.mapstruct.Mapper;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
 
+/**
+ * Маппер файловых данных в объект Entity.
+ */
 @Mapper(componentModel = "spring")
 public abstract class CallDataRecordMapper {
 
@@ -16,7 +19,6 @@ public abstract class CallDataRecordMapper {
 			callDataRecord.endTime(data[3]);
 			callDataRecord.tariffType(tariffType);
 		}
-
 		return callDataRecord.build();
 	}
 

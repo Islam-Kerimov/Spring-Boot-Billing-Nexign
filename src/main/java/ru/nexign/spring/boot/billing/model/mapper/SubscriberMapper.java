@@ -4,7 +4,9 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import ru.nexign.spring.boot.billing.model.dto.*;
+import ru.nexign.spring.boot.billing.model.dto.PaymentDto;
+import ru.nexign.spring.boot.billing.model.dto.ReportResponse;
+import ru.nexign.spring.boot.billing.model.dto.SubscriberDto;
 import ru.nexign.spring.boot.billing.model.entity.BillingReport;
 import ru.nexign.spring.boot.billing.model.entity.Operator;
 import ru.nexign.spring.boot.billing.model.entity.Subscriber;
@@ -12,6 +14,9 @@ import ru.nexign.spring.boot.billing.model.entity.Tariff;
 
 import java.util.List;
 
+/**
+ * Маппер объекта Entity в DTO и обратно.
+ */
 @Mapper(componentModel = "spring", uses = BillingReportMapper.class)
 public abstract class SubscriberMapper {
 

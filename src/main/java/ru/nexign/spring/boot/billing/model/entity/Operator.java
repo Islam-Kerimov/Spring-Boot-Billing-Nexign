@@ -15,10 +15,13 @@ import java.util.List;
 @Entity
 @Table(name = "operator")
 public class Operator implements Serializable {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column
 	private Integer id;
+
+	@Column(unique = true, nullable = false)
 	private String name;
 
 	@OneToMany(mappedBy = "operator", orphanRemoval = true)

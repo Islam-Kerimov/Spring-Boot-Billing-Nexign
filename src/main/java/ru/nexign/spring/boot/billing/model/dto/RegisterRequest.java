@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-    @NotBlank(message = "The username is required and not null")
-    private String username;
-    @NotBlank(message = "The password is required and not null")
-    private String password;
+
+	@NotBlank(message = "The username is required and not null")
+	private String username;
+
+	@NotBlank(message = "The password is required and not null")
+	private String password;
 }

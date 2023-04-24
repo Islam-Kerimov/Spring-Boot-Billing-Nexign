@@ -7,22 +7,29 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
 
+/**
+ * Тариф "Х".
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class XTariff implements TariffPlan {
-    private boolean incomingInside;
-    private boolean outgoingInside;
-    private String operator;
-    private ByMinuteTariff byMinuteTariff;
 
-    @Override
-    public double getCost(LocalTime duration, CallType callType, Boolean operator) {
-        if (operator && incomingInside && outgoingInside) {
-            return 0;
-        }
-        int minutes = getTotalMinutes(duration);
-        return minutes * byMinuteTariff.getMinutePrice();
-    }
+	private boolean incomingInside;
+
+	private boolean outgoingInside;
+
+	private String operator;
+
+	private ByMinuteTariff byMinuteTariff;
+
+	@Override
+	public double getCost(LocalTime duration, CallType callType, Boolean operator) {
+		if (operator && incomingInside && outgoingInside) {
+			return 0;
+		}
+		int minutes = getTotalMinutes(duration);
+		return minutes * byMinuteTariff.getMinutePrice();
+	}
 }

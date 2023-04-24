@@ -7,37 +7,41 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
 
+/**
+ * Тариф "Обычный".
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class OrdinaryTariff implements TariffPlan {
-    private boolean incomingInside;
-    private boolean incomingAnother;
-    private int firstMin;
-    private double firstPrice;
-    private String operator;
-    private ByMinuteTariff byMinuteTariff;
 
-    @Override
-    public double getCost(LocalTime duration, CallType callType, Boolean operator) {
-        if (CallType.INCOMING.equals(callType) && incomingAnother && incomingInside) {
-            return 0;
-        }
+	private boolean incomingInside;
+	private boolean incomingAnother;
+	private int firstMin;
+	private double firstPrice;
+	private String operator;
+	private ByMinuteTariff byMinuteTariff;
 
-        int minutes = getTotalMinutes(duration);
-        if (firstMin > 0) {
-            double totalCost;
-            if (minutes <= firstMin) {
-                totalCost = (minutes * firstPrice);
-                firstMin -= minutes;
-            } else {
-                totalCost = (firstMin * firstPrice) + ((minutes - firstMin) * byMinuteTariff.getMinutePrice());
-                firstMin = 0;
-            }
-            return totalCost;
-        } else {
-            return minutes * byMinuteTariff.getMinutePrice();
-        }
-    }
+	@Override
+	public double getCost(LocalTime duration, CallType callType, Boolean operator) {
+		if (CallType.INCOMING.equals(callType) && incomingAnother && incomingInside) {
+			return 0;
+		}
+
+		int minutes = getTotalMinutes(duration);
+		if (firstMin > 0) {
+			double totalCost;
+			if (minutes <= firstMin) {
+				totalCost = (minutes * firstPrice);
+				firstMin -= minutes;
+			} else {
+				totalCost = (firstMin * firstPrice) + ((minutes - firstMin) * byMinuteTariff.getMinutePrice());
+				firstMin = 0;
+			}
+			return totalCost;
+		} else {
+			return minutes * byMinuteTariff.getMinutePrice();
+		}
+	}
 }

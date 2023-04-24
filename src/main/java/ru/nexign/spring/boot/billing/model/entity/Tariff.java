@@ -15,28 +15,54 @@ import java.util.List;
 @Table(name = "tariff")
 @Builder
 public class Tariff implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    protected Integer id;
-    protected String uuid;
-    protected String name;
-    protected Integer fixMin;
-    @Column(columnDefinition = "NUMERIC")
-    protected Double fixPrice;
-    protected Integer firstMin;
-    @Column(columnDefinition = "NUMERIC")
-    protected Double firstPrice;
-    @Column(columnDefinition = "NUMERIC")
-    protected Double minutePrice;
-    protected Boolean incomingInside;
-    protected Boolean outgoingInside;
-    protected Boolean incomingAnother;
-    protected Boolean outgoingAnother;
-    protected String monetaryUnit;
-    protected String redirect;
-    protected String operator;
 
-    @OneToMany(mappedBy = "tariff")
-    private List<Subscriber> subscribers = new ArrayList<>();
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column
+	private Integer id;
+
+	@Column(unique = true, nullable = false)
+	private String uuid;
+
+	@Column(unique = true, nullable = false)
+	private String name;
+
+	@Column
+	private Integer fixMin;
+
+	@Column(columnDefinition = "NUMERIC")
+	private Double fixPrice;
+
+	@Column
+	private Integer firstMin;
+
+	@Column(columnDefinition = "NUMERIC")
+	private Double firstPrice;
+
+	@Column(columnDefinition = "NUMERIC")
+	private Double minutePrice;
+
+	@Column
+	private Boolean incomingInside;
+
+	@Column
+	private Boolean outgoingInside;
+
+	@Column
+	private Boolean incomingAnother;
+
+	@Column
+	private Boolean outgoingAnother;
+
+	@Column
+	private String monetaryUnit;
+
+	@Column
+	private String redirect;
+
+	@Column(nullable = false)
+	private String operator;
+
+	@OneToMany(mappedBy = "tariff")
+	private List<Subscriber> subscribers = new ArrayList<>();
 }
