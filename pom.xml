@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.nexign</groupId>
     <artifactId>spring-boot-billing-nexign</artifactId>
-    <version>0.1.1</version>
+    <version>1.0.0</version>
     <name>spring-boot-billing-nexign</name>
     <description>spring-boot-billing-nexign</description>
 

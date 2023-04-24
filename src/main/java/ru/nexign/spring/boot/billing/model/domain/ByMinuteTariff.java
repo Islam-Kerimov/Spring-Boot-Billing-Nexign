@@ -7,16 +7,20 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
 
+/**
+ * Тариф "Поминутный".
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ByMinuteTariff implements TariffPlan {
-    private double minutePrice;
 
-    @Override
-    public double getCost(LocalTime duration, CallType callType, Boolean operator) {
-        int minutes = getTotalMinutes(duration);
-        return minutes * minutePrice;
-    }
+	private double minutePrice;
+
+	@Override
+	public double getCost(LocalTime duration, CallType callType, Boolean operator) {
+		int minutes = getTotalMinutes(duration);
+		return minutes * minutePrice;
+	}
 }

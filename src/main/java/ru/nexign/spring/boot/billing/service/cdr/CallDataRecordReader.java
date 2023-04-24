@@ -26,17 +26,37 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @RequiredArgsConstructor
 @Slf4j
 public class CallDataRecordReader {
+
+	private static final Integer CORRECT_SIZE_INCOMING_DATA = 4;
+
+	private static final Integer MAX_SECONDS_IN_DAY = 86399;
+
 	private static final DateTimeFormatter INPUT_FORMATTER = ofPattern("yyyyMMddHHmmss");
+
 	private static final DateTimeFormatter OUTPUT_FORMATTER = ofPattern("yyyy-MM-dd HH:mm:ss");
+
 	private final CallDataRecordRepository callDataRecordRepository;
+
 	private final CallDataRecordMapper callDataRecordMapper;
 
+	/**
+	 * Получение тестовых данных биллинга за определенный месяц из БД.
+	 *
+	 * @return список объектов с тестовыми данными
+	 */
 	public List<CallDataRecord> read() {
 		List<CallDataRecord> callDataRecords = callDataRecordRepository.findAll();
 		callDataRecordRepository.deleteAll();
 		return callDataRecords;
 	}
 
+	/**
+	 * Получение данных биллинга за определенный месяц из файла.
+	 *
+	 * @param cdrFile                     файл с тестовыми данными
+	 * @param correctPhoneNumberAndTariff список абонентов
+	 * @return список объектов с тестовыми данными обогащенный типами тарифов
+	 */
 	public List<CallDataRecord> read(String cdrFile, Map<String, String> correctPhoneNumberAndTariff) {
 		List<CallDataRecord> dataRecords = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(cdrFile))) {
@@ -66,7 +86,8 @@ public class CallDataRecordReader {
 		String[] data = Arrays.stream(callData.split(","))
 			.map(String::trim)
 			.toArray(String[]::new);
-		if (data.length != 4) {
+
+		if (data.length != CORRECT_SIZE_INCOMING_DATA) {
 			log.error("Некорректная информация звонка [{}]", callData);
 			return false;
 		}
@@ -89,7 +110,7 @@ public class CallDataRecordReader {
 
 			String endInput = LocalDateTime.parse(end, INPUT_FORMATTER).format(OUTPUT_FORMATTER);
 			LocalDateTime endDate = LocalDateTime.parse(endInput, OUTPUT_FORMATTER);
-			return startDate.isBefore(endDate) && startDate.until(endDate, SECONDS) <= 86399;
+			return startDate.isBefore(endDate) && startDate.until(endDate, SECONDS) <= MAX_SECONDS_IN_DAY;
 		} catch (DateTimeParseException dtpe) {
 			return false;
 		}

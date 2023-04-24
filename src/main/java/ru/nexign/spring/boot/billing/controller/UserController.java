@@ -18,6 +18,8 @@ import ru.nexign.spring.boot.billing.security.UserService;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.String.format;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @Validated
@@ -25,23 +27,24 @@ import java.util.Optional;
 @Tag(name = "User", description = "The User API. Contains all the operations that can be performed on a user.")
 public class UserController {
 
-    private final UserService userService;
-    private final UserMapper userMapper;
+	private final UserService userService;
 
-    @GetMapping
-    @Operation(summary = "Получение всех пользователей в БД",
-            description = "Отображение всех авторизованных пользователей в БД")
-    public List<UserDto> getAllUsers() {
-        List<User> users = userService.getAll();
-        return userMapper.entityUserListToDtoList(users);
-    }
+	private final UserMapper userMapper;
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Получение пользователя по id",
-            description = "Отображение информации о пользователе")
-    public UserDto getUserById(@PathVariable @Min(1) Integer id) {
-        Optional<User> user = userService.findById(id);
-        return userMapper.entityUserToDto(user
-                .orElseThrow(() -> new EntityNotFoundException("There is no user with ID = " + id + " in Database")));
-    }
+	@GetMapping
+	@Operation(summary = "Получение всех пользователей в БД",
+		description = "Отображение всех авторизованных пользователей в БД")
+	public List<UserDto> getAllUsers() {
+		List<User> users = userService.getAll();
+		return userMapper.entityUserListToDtoList(users);
+	}
+
+	@GetMapping("/{id}")
+	@Operation(summary = "Получение пользователя по id",
+		description = "Отображение информации о пользователе")
+	public UserDto getUserById(@PathVariable @Min(1) Integer id) {
+		Optional<User> user = userService.findById(id);
+		return userMapper.entityUserToDto(user
+			.orElseThrow(() -> new EntityNotFoundException(format("There is no user with ID = %d in Database", id))));
+	}
 }

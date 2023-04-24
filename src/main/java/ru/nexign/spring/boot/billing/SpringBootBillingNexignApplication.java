@@ -18,24 +18,28 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class SpringBootBillingNexignApplication implements CommandLineRunner {
+
 	private static final String REPORT_DIRECTORY = "report";
 
 	private final BillingRealTimeService billingRealTimeService;
+
 	private final HighPerformanceRatingServerService highPerformanceRatingServerService;
+
 	private final GeneratorCallDataService generator;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootBillingNexignApplication.class, args);
 	}
 
+	/**
+	 * Выполнение тарификации при запуске проекта.
+	 */
 	@Override
 	public void run(String... args) {
 		// create directory for cdr and cdr+ files
-		boolean directory = (new File(REPORT_DIRECTORY)).mkdir();
-
+		new File(REPORT_DIRECTORY).mkdir();
 		// generate cdr records to dataBase
 		generator.generate();
-
 		// billing
 		String cdrPlusFile = billingRealTimeService.billing();
 		Map<String, Double> totalCost = highPerformanceRatingServerService.computeSubscriberTotalCost(cdrPlusFile);

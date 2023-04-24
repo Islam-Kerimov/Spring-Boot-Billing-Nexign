@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/nexign
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -27,7 +27,7 @@ jwt:
     key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
 
 server:
-  port: 8080
+  port: 8090
 
 swagger:
   info:

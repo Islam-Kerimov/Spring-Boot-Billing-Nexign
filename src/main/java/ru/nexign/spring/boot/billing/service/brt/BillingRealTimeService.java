@@ -25,12 +25,17 @@ import static ru.nexign.spring.boot.billing.service.cdr.GeneratorCallDataService
 @RequiredArgsConstructor
 @Slf4j
 public class BillingRealTimeService {
+
 	private static final String DIRECTORY = "report";
+
 	private static final String CDR_FILE = "cdr_%d_%d.txt";
+
 	private static final String CDR_FILE_PLUS = "cdr+_%d_%d.txt";
 
 	private final CallDataRecordReader callDataRecordReader;
+
 	private final CallDataRecordWriter callDataRecordWriter;
+
 	private final SubscriberRepository subscriberRepository;
 
 	@Transactional
@@ -53,6 +58,12 @@ public class BillingRealTimeService {
 		return cdrPlusFile;
 	}
 
+	/**
+	 * Внесение изменений балансов абонентов согласно их длительности
+	 * разговора за определенный период и условиям тарифа.
+	 *
+	 * @param totalCost список абонентов с суммой списания
+	 */
 	@Transactional
 	public void updateBalance(Map<String, Double> totalCost) {
 		Set<Subscriber> subscribersUpdate = subscriberRepository.findAllByPhoneNumberIn(totalCost.keySet(), Sort.by("id"));

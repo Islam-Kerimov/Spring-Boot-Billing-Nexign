@@ -14,16 +14,23 @@ import java.util.List;
 @Slf4j
 public class CallDataRecordWriter {
 
-    public int write(List<CallDataRecord> callData, String cdrFile) {
-        int countRecord = 0;
-        try (FileWriter writer = new FileWriter(cdrFile)) {
-            for (CallDataRecord info : callData) {
-                writer.write(info.toString());
-                countRecord++;
-            }
-        } catch (IOException ioe) {
-            log.error("Ошибка во время записи файла: " + ioe);
-        }
-        return countRecord;
-    }
+	/**
+	 * Записывает данные звонков построчно в файл.
+	 *
+	 * @param callData список данных звонков для записи
+	 * @param cdrFile  файл, в который будут записаны данные
+	 * @return количество записанных звонков
+	 */
+	public int write(List<CallDataRecord> callData, String cdrFile) {
+		int countRecord = 0;
+		try (FileWriter writer = new FileWriter(cdrFile)) {
+			for (CallDataRecord info : callData) {
+				writer.write(info.toString());
+				countRecord++;
+			}
+		} catch (IOException ioe) {
+			log.error("Ошибка во время записи файла: " + ioe);
+		}
+		return countRecord;
+	}
 }

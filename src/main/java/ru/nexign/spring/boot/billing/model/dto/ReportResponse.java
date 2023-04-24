@@ -15,12 +15,19 @@ import java.util.List;
 @NoArgsConstructor
 @JsonPropertyOrder({"id", "phoneNumber", "tariffUuid", "operator", "payload", "totalCost", "monetaryUnit"})
 public class ReportResponse {
+
 	private Integer id;
+
 	private String phoneNumber;
+
 	@JsonProperty("tariff_id")
 	private String tariffUuid;
+
 	private String operator;
+
 	private List<BillingReportDto> payload;
+
 	private Double totalCost;
+
 	private String monetaryUnit;
 }

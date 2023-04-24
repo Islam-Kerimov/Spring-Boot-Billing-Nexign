@@ -12,5 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BillingResponse {
+
 	private List<SubscriberDto> numbers;
 }

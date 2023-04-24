@@ -8,12 +8,15 @@ import ru.nexign.spring.boot.billing.model.entity.User;
 
 import java.util.List;
 
+/**
+ * Маппер объекта Entity в DTO.
+ */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Named("User")
-    UserDto entityUserToDto(User user);
+	@Named("User")
+	UserDto entityUserToDto(User user);
 
-    @IterableMapping(qualifiedByName = "User")
-    List<UserDto> entityUserListToDtoList(List<User> users);
+	@IterableMapping(qualifiedByName = "User")
+	List<UserDto> entityUserListToDtoList(List<User> users);
 }

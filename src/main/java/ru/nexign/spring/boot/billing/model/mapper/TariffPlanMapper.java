@@ -7,6 +7,9 @@ import ru.nexign.spring.boot.billing.model.domain.UnlimitedTariff;
 import ru.nexign.spring.boot.billing.model.domain.XTariff;
 import ru.nexign.spring.boot.billing.model.entity.Tariff;
 
+/**
+ * Инициализация тарифов согласно их параметрам.
+ */
 @Mapper(componentModel = "spring")
 public abstract class TariffPlanMapper {
 

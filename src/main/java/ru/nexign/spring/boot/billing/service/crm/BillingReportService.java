@@ -14,9 +14,9 @@ import java.util.List;
 @Slf4j
 public class BillingReportService {
 
-    private final BillingReportRepository billingReportRepository;
+	private final BillingReportRepository billingReportRepository;
 
-    public List<BillingReport> getAllBillingReportBy(String phoneNumber, Sort sort) {
-        return billingReportRepository.findAllByPhoneNumber(phoneNumber, sort);
-    }
+	public List<BillingReport> getAllBillingReportBy(String phoneNumber, Sort sort) {
+		return billingReportRepository.findAllByPhoneNumber(phoneNumber, sort);
+	}
 }

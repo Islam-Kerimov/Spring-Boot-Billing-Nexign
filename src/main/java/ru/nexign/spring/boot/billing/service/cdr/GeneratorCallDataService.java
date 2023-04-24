@@ -1,6 +1,7 @@
 package ru.nexign.spring.boot.billing.service.cdr;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.nexign.spring.boot.billing.model.entity.CallDataRecord;
@@ -16,15 +17,25 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.Math.min;
 import static java.lang.Math.random;
+import static java.lang.String.valueOf;
+import static java.time.LocalTime.ofSecondOfDay;
 
+/**
+ * Генерация тестовых данных.
+ */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GeneratorCallDataService {
+
 	private static final int PHONE_NUMBER_LENGTH = 9;
+
 	public static int YEAR = 2023;
+
 	public static int MONTH = 0;
 
 	private final SubscriberService subscriberService;
+
 	private final CallDataRecordRepository callDataRecordRepository;
 
 	private String createRandomCallType() {
@@ -45,7 +56,7 @@ public class GeneratorCallDataService {
 	}
 
 	private String[] createRandomCallTime() {
-		String month = MONTH > 9 ? String.valueOf(MONTH) : "0" + MONTH;
+		String month = MONTH > 9 ? valueOf(MONTH) : "0" + MONTH;
 		String[] day = getStartEndDay();
 		String[] time = getStartEndTime();
 
@@ -56,9 +67,9 @@ public class GeneratorCallDataService {
 
 	private String[] getStartEndDay() {
 		int start = (int) ((random() * (31 - 1)) + 1);
-		String startDay = start > 9 ? String.valueOf(start) : "0" + start;
+		String startDay = start > 9 ? valueOf(start) : "0" + start;
 		int end = (int) ((random() * ((start + 1) - start)) + start);
-		String endDay = end > 9 ? String.valueOf(end) : "0" + end;
+		String endDay = end > 9 ? valueOf(end) : "0" + end;
 
 		return new String[]{startDay, endDay};
 	}
@@ -68,8 +79,8 @@ public class GeneratorCallDataService {
 		int endSeconds = LocalTime.MAX.toSecondOfDay();
 		int randomTime = ThreadLocalRandom.current().nextInt(startSeconds, endSeconds);
 
-		LocalTime localTimeStart = LocalTime.ofSecondOfDay(randomTime);
-		LocalTime localTimeEnd = LocalTime.ofSecondOfDay(min((int) ((random() * ((randomTime + 1200) - randomTime)) + randomTime), 86399));
+		LocalTime localTimeStart = ofSecondOfDay(randomTime);
+		LocalTime localTimeEnd = ofSecondOfDay(min((int) ((random() * ((randomTime + 1200) - randomTime)) + randomTime), 86399));
 
 		return new String[]{
 			localTimeStart.toString().replace(":", ""),
@@ -94,6 +105,9 @@ public class GeneratorCallDataService {
 			.build();
 	}
 
+	/**
+	 * Помесячная итерация после генерации тестовых данных
+	 */
 	private void iterateMonthReport() {
 		MONTH++;
 		if (MONTH == 13) {
@@ -102,6 +116,9 @@ public class GeneratorCallDataService {
 		}
 	}
 
+	/**
+	 * Генерация тестовых данных согласно абонентам из БД.
+	 */
 	public void generate() {
 		iterateMonthReport();
 		List<Subscriber> subscribersInDb = subscriberService.getAllSubscribers(Sort.by("id"));
@@ -112,6 +129,7 @@ public class GeneratorCallDataService {
 			callDataRecordList.add(callDataRecord);
 		}
 
+		log.info("Тестовые данные биллинга сгенерированы и сохранены в БД");
 		callDataRecordRepository.saveAll(callDataRecordList);
 	}
 }

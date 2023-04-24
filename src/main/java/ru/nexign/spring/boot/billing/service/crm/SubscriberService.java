@@ -3,10 +3,6 @@ package ru.nexign.spring.boot.billing.service.crm;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,72 +17,76 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.String.format;
+import static java.util.Optional.empty;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriberService {
 
-    private final SubscriberRepository subscriberRepository;
-    private final TariffRepository tariffRepository;
-    private final OperatorRepository operatorRepository;
+	private final SubscriberRepository subscriberRepository;
 
-    public List<Subscriber> getAllSubscribers(Sort sort) {
-        return subscriberRepository.findAll(sort);
-    }
+	private final TariffRepository tariffRepository;
 
-    public Optional<Subscriber> updateTariff(Subscriber subscriber) {
-        return subscriberRepository.findByPhoneNumber(subscriber.getPhoneNumber())
-                .map(entity -> {
-                    Optional<Tariff> byUuid = tariffRepository.findByUuid(subscriber.getTariff().getUuid());
-                    if (byUuid.isPresent()) {
-                        log.info("Updating tariff {} on {} by phone_number {}", byUuid.get().getUuid(),
-                                subscriber.getTariff().getUuid(), subscriber.getPhoneNumber());
-                        entity.setTariff(byUuid.get());
-                        subscriberRepository.saveAndFlush(entity);
-                        return entity;
-                    }
-                    throw new EntityNotFoundException(format("tariff_id %s not found", subscriber.getTariff().getUuid()));
-                });
-    }
+	private final OperatorRepository operatorRepository;
 
-    public Optional<Subscriber> updateBalance(Subscriber subscriber) {
-        return subscriberRepository.findByPhoneNumber(subscriber.getPhoneNumber())
-                .map(entity -> {
-                    log.info("Replenishment of the balance on '{}' of the phone_number {}", subscriber.getBalance(), subscriber.getPhoneNumber());
-                    entity.setBalance(entity.getBalance() + subscriber.getBalance());
-                    subscriberRepository.saveAndFlush(entity);
-                    return entity;
-                });
-    }
+	public List<Subscriber> getAllSubscribers(Sort sort) {
+		return subscriberRepository.findAll(sort);
+	}
 
-    @Transactional
-    public Optional<Subscriber> createSubscriber(Subscriber subscriber) {
-        if (!tariffRepository.existsByUuid(subscriber.getTariff().getUuid())) {
-            throw new EntityNotFoundException(format("tariff_id %s not found", subscriber.getTariff().getUuid()));
-        }
-        if (!operatorRepository.existsByName(subscriber.getOperator().getName())) {
-            throw new EntityNotFoundException(format("operator %s not found", subscriber.getOperator().getName()));
-        }
-        if (!subscriberRepository.existsByPhoneNumber(subscriber.getPhoneNumber())) {
+	public Optional<Subscriber> updateTariff(Subscriber subscriber) {
+		return subscriberRepository.findByPhoneNumber(subscriber.getPhoneNumber())
+			.map(entity -> {
+				Optional<Tariff> byUuid = tariffRepository.findByUuid(subscriber.getTariff().getUuid());
+				if (byUuid.isPresent()) {
+					log.info("Updating tariff {} on {} by phone_number {}", byUuid.get().getUuid(),
+						subscriber.getTariff().getUuid(), subscriber.getPhoneNumber());
+					entity.setTariff(byUuid.get());
+					subscriberRepository.saveAndFlush(entity);
+					return entity;
+				}
+				throw new EntityNotFoundException(format("tariff_id %s not found", subscriber.getTariff().getUuid()));
+			});
+	}
 
-            int isSave = subscriberRepository.saveBy(
-                    subscriber.getPhoneNumber(),
-                    subscriber.getTariff().getUuid(),
-                    subscriber.getBalance(),
-                    subscriber.getOperator().getName());
-            if (isSave > 0) {
-                return getSubscriber(subscriber.getPhoneNumber());
-            }
-        }
-        return Optional.empty();
-    }
+	public Optional<Subscriber> updateBalance(Subscriber subscriber) {
+		return subscriberRepository.findByPhoneNumber(subscriber.getPhoneNumber())
+			.map(entity -> {
+				log.info("Replenishment of the balance on '{}' of the phone_number {}",
+					subscriber.getBalance(), subscriber.getPhoneNumber());
+				entity.setBalance(entity.getBalance() + subscriber.getBalance());
+				subscriberRepository.saveAndFlush(entity);
+				return entity;
+			});
+	}
 
-    public Optional<Subscriber> getSubscriber(String phoneNumber) {
-        return subscriberRepository.findByPhoneNumber(phoneNumber);
-    }
+	@Transactional
+	public Optional<Subscriber> createSubscriber(Subscriber subscriber) {
+		if (!tariffRepository.existsByUuid(subscriber.getTariff().getUuid())) {
+			throw new EntityNotFoundException(format("tariff_id %s not found", subscriber.getTariff().getUuid()));
+		}
+		if (!operatorRepository.existsByName(subscriber.getOperator().getName())) {
+			throw new EntityNotFoundException(format("operator %s not found", subscriber.getOperator().getName()));
+		}
+		if (!subscriberRepository.existsByPhoneNumber(subscriber.getPhoneNumber())) {
+			int isSave = subscriberRepository.saveBy(
+				subscriber.getPhoneNumber(),
+				subscriber.getTariff().getUuid(),
+				subscriber.getBalance(),
+				subscriber.getOperator().getName());
+			if (isSave > 0) {
+				log.info("Абонент {} добавлен", subscriber);
+				return getSubscriber(subscriber.getPhoneNumber());
+			}
+		}
+		return empty();
+	}
 
-    public Set<Subscriber> getAllBillingSubscribers(Set<String> phoneNumbers, Sort sort) {
-        return subscriberRepository.findAllByPhoneNumberIn(phoneNumbers, sort);
-    }
+	public Optional<Subscriber> getSubscriber(String phoneNumber) {
+		return subscriberRepository.findByPhoneNumber(phoneNumber);
+	}
+
+	public Set<Subscriber> getAllBillingSubscribers(Set<String> phoneNumbers, Sort sort) {
+		return subscriberRepository.findAllByPhoneNumberIn(phoneNumbers, sort);
+	}
 }
